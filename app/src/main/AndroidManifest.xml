@@ -9,13 +9,13 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
+        <activity android:name=".AddIdeaActivity">
+        </activity>
         <activity android:name=".NoteItemActivity">
         </activity>
         <activity android:name=".NoteIdeaActivity">
         </activity>
         <activity android:name=".IdeaListActivity">
-        </activity>
-        <activity android:name=".AddIdeaActivity">
         </activity>
         <activity android:name=".IdeaActivity">
         </activity>
