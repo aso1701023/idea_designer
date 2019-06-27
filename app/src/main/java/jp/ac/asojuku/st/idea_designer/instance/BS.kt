@@ -39,6 +39,7 @@ class BS(thema:String,time: Array<Int>,estimate:Int) :Serializable{
 
     fun set_time(textView:TextView){
         this.time_text = textView
+        Log.d("test",current_place.toString())
         time_text?.setText(time_array[current_place].toString())
     }
     //ブレストとアイデアの紐付けを解除する

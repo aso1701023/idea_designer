@@ -1,7 +1,10 @@
 package jp.ac.asojuku.st.idea_designer.view
 
+import jp.ac.asojuku.st.idea_designer.instance.Item
+
+
 //　リサイクラービューで表示するためのデータモデル
-class RowData(title:String, detail:String){
+class RowData(title:String, detailList:ArrayList<Item>){
     var title = title
-    var detail = detail
+    var detailList = detailList
 }

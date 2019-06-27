@@ -10,7 +10,7 @@
     <ImageView
             android:layout_width="417dp"
             android:layout_height="0dp" app:srcCompat="@color/colorAccent"
-            android:id="@+id/imageView" app:layout_constraintEnd_toEndOf="parent"
+            android:id="@+id/recycler_image_background" app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp" app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="1dp"
@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/idea_button_nextpage"
-            app:layout_constraintTop_toBottomOf="@+id/imageView" android:layout_marginBottom="134dp"
+            app:layout_constraintTop_toBottomOf="@+id/recycler_image_background" android:layout_marginBottom="134dp"
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintVertical_bias="1.0"/>
@@ -28,17 +28,17 @@
             android:text="てーま"
             android:layout_width="0dp"
             android:layout_height="33dp"
-            android:id="@+id/add_text_thema" app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/idealist_text_thema" app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginTop="39dp"
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginLeft="122dp"
-            android:layout_marginStart="122dp" app:layout_constraintEnd_toStartOf="@+id/idea_text_time"
+            android:layout_marginStart="122dp" app:layout_constraintEnd_toStartOf="@+id/idealist_text_time"
             android:layout_marginEnd="39dp" android:layout_marginRight="39dp" android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toTopOf="@+id/idea_edit_idea" app:layout_constraintVertical_bias="0.0"/>
     <ImageView
             android:layout_width="310dp"
             android:layout_height="317dp" app:srcCompat="@android:color/darker_gray"
             android:id="@+id/imageView4"
-            app:layout_constraintTop_toBottomOf="@+id/idea_text_time" android:layout_marginBottom="333dp"
+            app:layout_constraintTop_toBottomOf="@+id/idealist_text_time" android:layout_marginBottom="333dp"
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
             android:layout_marginLeft="76dp" app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginStart="76dp" android:layout_marginEnd="76dp" android:layout_marginRight="76dp"/>
@@ -46,8 +46,8 @@
             android:text="TextView"
             android:layout_width="wrap_content"
             android:layout_height="20dp"
-            android:id="@+id/idea_text_time" android:layout_marginTop="100dp"
-            app:layout_constraintStart_toEndOf="@+id/add_text_thema" app:layout_constraintEnd_toEndOf="parent"
+            android:id="@+id/idealist_text_time" android:layout_marginTop="100dp"
+            app:layout_constraintStart_toEndOf="@+id/idealist_text_thema" app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginBottom="109dp" app:layout_constraintBottom_toTopOf="@+id/imageView4"
             app:layout_constraintTop_toTopOf="parent" android:layout_marginEnd="23dp"
             android:layout_marginRight="23dp"/>

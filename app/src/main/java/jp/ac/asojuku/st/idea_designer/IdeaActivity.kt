@@ -17,7 +17,7 @@ class IdeaActivity : AppCompatActivity(),Serializable{
 
     fun init(){
         bs = intent.getSerializableExtra("bs") as BS
-        bs.set_time(findViewById(R.id.idea_text_time))
+        bs.set_time(findViewById(R.id.idealist_text_time))
         coroutine = Coroutine(bs, Handler(),Inner())
         coroutine.start()
     }
@@ -44,7 +44,6 @@ class IdeaActivity : AppCompatActivity(),Serializable{
     inner class Inner:inner(),Serializable{
         override fun intent() {
             bs.time_text = null
-            bs.current_place++
             startActivity<AddIdeaActivity>("bs" to bs)
             coroutine.destroy()
             finish()

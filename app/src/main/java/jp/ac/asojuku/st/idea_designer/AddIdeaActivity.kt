@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.view.animation.AnimationUtils.loadAnimation
 import android.widget.Toast
 import jp.ac.asojuku.st.idea_designer.instance.BS
 import jp.ac.asojuku.st.idea_designer.instance.Coroutine
@@ -37,7 +36,7 @@ class AddIdeaActivity : AppCompatActivity() {
         coroutine = Coroutine(bs, Handler(),Inner())
         coroutine.start()
 
-        add_text_thema.setText(bs.thema)
+        idealist_text_thema.setText(bs.thema)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,35 +79,39 @@ class AddIdeaActivity : AppCompatActivity() {
 
 
     fun change_idea(rl:Int){
-        if(rl==1) { //右から入ってくる
-            inc_print_num()
-            print_idea(print_num)
-            viewFlipper.setInAnimation(inFromRightAnimation);
-            viewFlipper.setOutAnimation(outToLeftAnimation);
-            viewFlipper.showNext()
-            first_second = (first_second+1)%2
-        }else{ ///左から入ってくる
-            Log.d("LLL","LLL")
-            dec_print_num()
-            print_idea(print_num)
-            viewFlipper.setInAnimation(inFromLeftAnimation)
-            viewFlipper.setOutAnimation(outToRightAnimation)
-            viewFlipper.showNext()
-            first_second = (first_second+1)%2
+        try {
+            if (rl == 1) { //右から入ってくる
+                inc_print_num()
+                print_idea(print_num)
+                viewFlipper.setInAnimation(inFromRightAnimation);
+                viewFlipper.setOutAnimation(outToLeftAnimation);
+                viewFlipper.showNext()
+                first_second = (first_second + 1) % 2
+            } else { ///左から入ってくる
+                Log.d("LLL", "LLL")
+                dec_print_num()
+                print_idea(print_num)
+                viewFlipper.setInAnimation(inFromLeftAnimation)
+                viewFlipper.setOutAnimation(outToRightAnimation)
+                viewFlipper.showNext()
+                first_second = (first_second + 1) % 2
+            }
+        }catch (e:IndexOutOfBoundsException){
+            Toast.makeText(this, "アイデアがありません。", Toast.LENGTH_SHORT).show()
         }
     }
 
     fun print_idea(idea_num:Int){
         try{
             if(first_second == 0){
-                secondlayout.add_text_idea.setText(bs.idea_list.get(idea_num).text)
-                secondlayout.add_text_detail.setText(bs.idea_list.get(idea_num).supplement)
+                secondlayout.recycler_text_idea.setText(bs.idea_list.get(idea_num).text)
+                secondlayout.recycler_listView_detail.setText(bs.idea_list.get(idea_num).supplement)
             }else{
-                firstlayout.add_text_idea.setText(bs.idea_list.get(idea_num).text)
-                firstlayout.add_text_detail.setText(bs.idea_list.get(idea_num).supplement)
+                firstlayout.recycler_text_idea.setText(bs.idea_list.get(idea_num).text)
+                firstlayout.recycler_listView_detail.setText(bs.idea_list.get(idea_num).supplement)
             }
 
-        }catch (e:ArrayIndexOutOfBoundsException){
+        }catch (e:IndexOutOfBoundsException){
             Toast.makeText(this, "アイデアがありません。", Toast.LENGTH_SHORT).show()
         }
     }
@@ -121,7 +124,6 @@ class AddIdeaActivity : AppCompatActivity() {
     inner class Inner:inner(), Serializable {
         override fun intent() {
             bs.time_text = null
-            bs.current_place++
             startActivity<IdeaListActivity>("bs" to bs)
             coroutine.destroy()
             finish()

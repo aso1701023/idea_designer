@@ -15,7 +15,7 @@
             android:layout_marginLeft="8dp" android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="8dp" android:layout_marginRight="8dp" android:layout_marginBottom="280dp"
             app:layout_constraintBottom_toBottomOf="parent" android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/imageView">
+            app:layout_constraintTop_toBottomOf="@+id/recycler_image_background">
         <include android:id="@+id/firstlayout" layout="@layout/first_view" android:layout_height="287dp"
                  android:layout_width="400dp"/>
         <include android:id="@+id/secondlayout" layout="@layout/second_view"/>
@@ -23,7 +23,7 @@
     <ImageView
             android:layout_width="417dp"
             android:layout_height="100dp" app:srcCompat="@color/colorAccent"
-            android:id="@+id/imageView"
+            android:id="@+id/recycler_image_background"
             tools:layout_editor_absoluteY="-6dp" tools:layout_editor_absoluteX="-3dp"
             tools:ignore="MissingConstraints"/>
     <TextView
@@ -31,12 +31,12 @@
             android:text="てーま"
             android:layout_width="260dp"
             android:layout_height="36dp"
-            android:id="@+id/add_text_thema"
+            android:id="@+id/idealist_text_thema"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginLeft="8dp" android:layout_marginStart="8dp"
-            app:layout_constraintEnd_toEndOf="@+id/imageView" android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="@+id/recycler_image_background" android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp" android:layout_marginTop="8dp" app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="@+id/imageView"/>
+            android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="@+id/recycler_image_background"/>
     <ImageView
             android:layout_width="310dp"
             android:layout_height="260dp" app:srcCompat="@android:color/darker_gray"
@@ -58,9 +58,9 @@
             android:layout_height="wrap_content"
             android:id="@+id/add_text_time" android:layout_marginTop="8dp"
             app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/imageView"
-            app:layout_constraintStart_toEndOf="@+id/add_text_thema" android:layout_marginLeft="8dp"
-            android:layout_marginStart="8dp" app:layout_constraintEnd_toStartOf="@+id/imageView"
+            app:layout_constraintBottom_toBottomOf="@+id/recycler_image_background"
+            app:layout_constraintStart_toEndOf="@+id/idealist_text_thema" android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp" app:layout_constraintEnd_toStartOf="@+id/recycler_image_background"
             android:layout_marginEnd="10dp" android:layout_marginRight="10dp"
             app:layout_constraintHorizontal_bias="0.0" android:background="#FFFFFFFF"/>
     <EditText
