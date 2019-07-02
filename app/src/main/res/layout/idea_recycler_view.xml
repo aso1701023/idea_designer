@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#00F00101">
+    <ImageView
+            android:layout_width="332dp"
+            android:layout_height="270dp" app:srcCompat="@color/colorAccent"
+            android:id="@+id/recycler_image_background" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp" app:layout_constraintHorizontal_bias="0.489"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintVertical_bias="0.533"
+            android:layout_marginRight="16dp" android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"/>
+
+    <ImageView
+            android:layout_width="30dp"
+            android:layout_height="17dp" android:id="@+id/recycler_button_dialog"
+            app:layout_constraintEnd_toEndOf="@+id/recycler_frame_itemTapped"
+            app:layout_constraintStart_toStartOf="@+id/recycler_frame_itemTapped" android:layout_marginBottom="12dp"
+            app:layout_constraintBottom_toBottomOf="@+id/recycler_frame_itemTapped"
+            app:srcCompat="@android:drawable/arrow_down_float"/>
+    <LinearLayout
+            android:layout_width="289dp"
+            android:layout_height="218dp"
+            android:orientation="vertical" tools:ignore="MissingConstraints"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp"
+            android:id="@+id/linearLayout_text"
+            app:layout_constraintTop_toTopOf="@+id/recycler_image_background"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp" android:layout_marginTop="8dp">
+
+        <TextView
+                android:background="@drawable/edit_main"
+                android:text="idea"
+                android:layout_width="280dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center|center_horizontal"
+                android:id="@+id/recycler_text_idea" android:layout_marginTop="10dp"
+                android:gravity="center" android:lines="3" android:isScrollContainer="false"
+        />
+        <ListView
+                android:background="@drawable/edit_main"
+                android:layout_width="280dp"
+                android:layout_height="110dp"
+                android:layout_gravity="center_horizontal"
+                android:id="@+id/recycler_listView_detail" android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+        />
+
+    </LinearLayout>
+    <FrameLayout
+            android:layout_width="320dp"
+            android:layout_height="match_parent" android:id="@+id/recycler_frame_ideaTapped"
+            app:layout_constraintEnd_toEndOf="@+id/recycler_image_background"
+            app:layout_constraintStart_toStartOf="@+id/recycler_image_background"
+            tools:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/recycler_frame_itemTapped">
+
+        <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" app:srcCompat="@android:color/holo_green_dark"
+                android:id="@+id/imageView6"/>
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:visibility="visible"
+                android:id="@+id/recycler_linear_ideaTapped">
+            <Button
+                    android:text="よき"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:id="@+id/recycler_button_agree"
+                    android:layout_weight="1"/>
+            <Button
+                    android:text="よくなき"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:id="@+id/recycler_button_against"
+                    android:layout_weight="1"/>
+        </LinearLayout>
+    </FrameLayout>
+    <FrameLayout
+            android:layout_width="320dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="@+id/recycler_image_background"
+            app:layout_constraintEnd_toEndOf="@+id/recycler_image_background"
+            app:layout_constraintHorizontal_bias="0.493"
+            app:layout_constraintBottom_toBottomOf="@+id/recycler_image_background"
+            android:id="@+id/recycler_frame_itemTapped" tools:visibility="invisible">
+
+        <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" app:srcCompat="@android:color/holo_green_dark"
+                android:id="@+id/imageView" android:layout_gravity="center"/>
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/recycler_linear_itemTapped" android:layout_gravity="center">
+            <Button
+                    android:text="機能を追加"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:id="@+id/recycler_button_addItem"
+                    android:layout_weight="1"/>
+            <Button
+                    android:id="@+id/recycler_button_ideaCopy" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:layout_weight="1" android:text="機能をコピー"/>
+        </LinearLayout>
+    </FrameLayout>
+    <ImageView
+            android:layout_width="0dp"
+            android:layout_height="1dp" android:background="#8A8A8A"
+            android:id="@+id/imageView7"
+            app:layout_constraintEnd_toEndOf="@+id/recycler_image_background"
+            app:layout_constraintStart_toStartOf="@+id/recycler_image_background"
+            app:layout_constraintBottom_toTopOf="@+id/recycler_button_dialog" android:layout_marginBottom="10dp"/>
+
+
+</android.support.constraint.ConstraintLayout>
