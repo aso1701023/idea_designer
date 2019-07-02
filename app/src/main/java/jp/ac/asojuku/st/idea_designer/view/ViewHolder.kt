@@ -12,6 +12,7 @@ class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val detailView: ListView = view.findViewById(R.id.recycler_listView_detail)
     val frameIdeaView: FrameLayout = view.findViewById(R.id.recycler_frame_ideaTapped)
     val frameItemView: FrameLayout = view.findViewById(R.id.recycler_frame_itemTapped)
+    val buttonMakeDialog : ImageView = view.findViewById(R.id.recycler_button_dialog)
 
     val buttonCopyView: Button = view.findViewById(R.id.recycler_button_ideaCopy)
     val buttonAdditemView: Button = view.findViewById(R.id.recycler_button_addItem)

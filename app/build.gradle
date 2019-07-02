@@ -1,8 +1,9 @@
 apply plugin: 'com.android.application'
 
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'realm-android'
 
 android {
     compileSdkVersion 28
@@ -34,7 +35,21 @@ dependencies {
     //anko
     implementation "org.jetbrains.anko:anko-common:$anko_version"
     //coroutin
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.27.0-eap13"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1"
     //recyclerview
     implementation 'com.android.support:recyclerview-v7:28.0.0'
+
+
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+
+    def bkCompilerVer = '8.8.1'
+    annotationProcessor "com.jakewharton:butterknife-compiler:${bkCompilerVer}"
+    kapt "com.jakewharton:butterknife-compiler:${bkCompilerVer}"
+
+    annotationProcessor 'org.parceler:parceler:1.1.10'
+
+    def parcelerVer = '1.1.10'
+    annotationProcessor "org.parceler:parceler:${parcelerVer}"
+    kapt "org.parceler:parceler:${parcelerVer}"
+
 }

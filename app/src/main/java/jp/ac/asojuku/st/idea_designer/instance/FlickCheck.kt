@@ -58,6 +58,7 @@ abstract class FlickCheck(frickView: View, adjustX: Float, adjustY: Float) {
                 return
             }
         }
+        getFlick(TAP)
 //        // 上フリック
 //        if (touchY > nowTouchY) {
 //            if (touchY - nowTouchY > adjustY) {
@@ -84,6 +85,7 @@ abstract class FlickCheck(frickView: View, adjustX: Float, adjustY: Float) {
 
         val LEFT_FLICK = 0
         val RIGHT_FLICK = 1
+        val TAP = -1
 //        val UP_FLICK = 2;
 //        val DOWN_FLICK = 3;
     }

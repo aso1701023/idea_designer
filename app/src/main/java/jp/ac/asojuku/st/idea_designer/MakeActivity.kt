@@ -13,7 +13,7 @@ class MakeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_make)
 
         config.setOnClickListener {
-            var bs = BS("テーマ", arrayOf(20,20,120),1)
+            var bs = BS("テーマ", arrayOf(10,20,20),1)
             startActivity<IdeaActivity>("bs" to bs)
         }
     }

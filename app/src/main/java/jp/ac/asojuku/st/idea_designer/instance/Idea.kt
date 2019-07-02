@@ -3,14 +3,14 @@ package jp.ac.asojuku.st.idea_designer.instance
 import android.util.Log
 import java.io.Serializable
 
-class Idea(bs: BS, text:String, supplement:String):Serializable{
+class Idea(bs: BS, idea:String, detail:String):Serializable{
 
     //対応ブレストのインスタンス
     var bs = bs
     //アイデアの内容
-    var text = text
+    var idea = idea
     //アイデアの補足説明
-    var supplement = supplement
+    var detail = detail
     //対応ブレストに自身のインスタンスを登録して、返ってきた添字をindexとする
     //DB的に言えば、bsとidの複合主キー
     var index = bs.add_idea(this)

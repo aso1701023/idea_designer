@@ -104,11 +104,11 @@ class AddIdeaActivity : AppCompatActivity() {
     fun print_idea(idea_num:Int){
         try{
             if(first_second == 0){
-                secondlayout.recycler_text_idea.setText(bs.idea_list.get(idea_num).text)
-                secondlayout.recycler_listView_detail.setText(bs.idea_list.get(idea_num).supplement)
+                secondlayout.recycler_text_idea.setText(bs.idea_list.get(idea_num).idea)
+                secondlayout.recycler_listView_detail.setText(bs.idea_list.get(idea_num).detail)
             }else{
-                firstlayout.recycler_text_idea.setText(bs.idea_list.get(idea_num).text)
-                firstlayout.recycler_listView_detail.setText(bs.idea_list.get(idea_num).supplement)
+                firstlayout.recycler_text_idea.setText(bs.idea_list.get(idea_num).idea)
+                firstlayout.recycler_listView_detail.setText(bs.idea_list.get(idea_num).detail)
             }
 
         }catch (e:IndexOutOfBoundsException){
