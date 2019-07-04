@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.FrameLayout
 import jp.ac.asojuku.st.idea_designer.db.RealmHelper
 import jp.ac.asojuku.st.idea_designer.instance.BS
 import jp.ac.asojuku.st.idea_designer.instance.Item
@@ -65,12 +66,12 @@ class LastIdeaListActivity : AppCompatActivity() {
         val adapter = ViewAdapter(
             dataList,
             object : ViewAdapter.IdeaListener {
-                override fun onClickRowIdea(tappedView: View, rowModel: RowData, addItemButton:Button, copyButton: Button) {
+                override fun onClickRowIdea(tappedView: View, rowModel: RowData, agreeButton:Button, againstButton: Button) {
                     fun (){}
                 }
             },
             object : ViewAdapter.ItemLisener{
-                override fun onClickRowItem(listPosition: Int, itemPosition: Int, agreeButton:Button, againstButton: Button){
+                override fun onClickRowItem(listPosition: Int, itemPosition: Int, addItemButton:Button, deleteItemButton:Button, copyButton: Button, frameLayout: FrameLayout){
                     fun (){}
                 }
             },
