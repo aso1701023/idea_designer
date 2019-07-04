@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.*
 import jp.ac.asojuku.st.idea_designer.R
+import org.jetbrains.anko.find
 
 
 class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -14,10 +15,11 @@ class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val frameItemView: FrameLayout = view.findViewById(R.id.recycler_frame_itemTapped)
     val buttonMakeDialog : ImageView = view.findViewById(R.id.recycler_button_dialog)
 
-    val buttonCopyView: Button = view.findViewById(R.id.recycler_button_ideaCopy)
+    val buttonCopyView: Button = view.findViewById(R.id.recycler_button_copyItem)
     val buttonAdditemView: Button = view.findViewById(R.id.recycler_button_addItem)
     val buttonAgreeView: Button = view.findViewById(R.id.recycler_button_agree)
     val buttonAgainstView: Button = view.findViewById(R.id.recycler_button_against)
+    val buttonDeleteView: Button = view.findViewById(R.id.recycler_button_deleteItem)
 
     init {
         frameIdeaView.visibility = View.GONE

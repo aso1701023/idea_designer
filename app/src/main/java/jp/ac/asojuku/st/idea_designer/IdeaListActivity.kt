@@ -115,17 +115,25 @@ class IdeaListActivity : AppCompatActivity() {
     }
 
     // リサイクラービューのアイテムリスト
-    fun onClickRowItem(listPosition: Int, itemPosition: Int, addItemButton:Button, copyButton: Button, frameItemView: FrameLayout){
+    fun onClickRowItem(listPosition: Int, itemPosition: Int, addItemButton:Button, deleteItemButton: Button, copyButton: Button, frameItemView: FrameLayout){
         // 機能追加ボタン。　選択したitemのインスタンスをideaのitem_listに登録し、リサイクラービューを再描画する。
         addItemButton.setOnClickListener {
             modeID = 0
             idealist_linear_correctItem.visibility = View.VISIBLE
             setItemPosition = listPosition
         }
+        //機能削除ボタン。選択したitemをitem_listから削除する
+        deleteItemButton.setOnClickListener {
+            bs.idea_list[listPosition].item_list[itemPosition].remove()
+            setRecyclerView()
+            (idealist_recyclerView.adapter as ViewAdapter).notifyDataSetChanged()
+            frameItemView.visibility = View.GONE
+        }
+
         // 機能コピーボタン。　選択したアイテムを一時保存し、表示していたアイテムリストタップ時の2つのボタンを非表示にする。
         // 格納されている機能が「追加機能がありません」の場合は何もしない
         copyButton.setOnClickListener {
-            if(bs.idea_list.get(listPosition).item_list.size==0){
+            if(bs.idea_list[listPosition].item_list.size==0){
                 frameItemView.visibility = View.GONE
                 return@setOnClickListener
             }
@@ -182,13 +190,13 @@ class IdeaListActivity : AppCompatActivity() {
         val adapter = ViewAdapter(
             dataList,
             object : ViewAdapter.IdeaListener {
-                override fun onClickRowIdea(tappedView: View, rowModel: RowData, addItemButton:Button, copyButton: Button) {
-                    this@IdeaListActivity.onClickRowIdea(tappedView, rowModel, addItemButton, copyButton)
+                override fun onClickRowIdea(tappedView: View, rowModel: RowData, agreeButton:Button, againstButton: Button) {
+                    this@IdeaListActivity.onClickRowIdea(tappedView, rowModel, agreeButton, againstButton)
                 }
             },
             object : ViewAdapter.ItemLisener{
-                override fun onClickRowItem(listPosition: Int, itemPosition: Int, agreeButton:Button, againstButton: Button, frameItemView: FrameLayout){
-                    this@IdeaListActivity.onClickRowItem(listPosition, itemPosition, agreeButton, againstButton, frameItemView)
+                override fun onClickRowItem(listPosition: Int, itemPosition: Int, addItemButton:Button, deleteItemButton: Button, copyButton: Button, frameItemView: FrameLayout){
+                    this@IdeaListActivity.onClickRowItem(listPosition, itemPosition, addItemButton, deleteItemButton, copyButton, frameItemView)
                 }
             },
             this,

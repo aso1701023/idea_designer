@@ -17,6 +17,7 @@ import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.Sort
 import jp.ac.asojuku.st.idea_designer.IdeaListActivity
+import jp.ac.asojuku.st.idea_designer.LastIdeaListActivity
 import jp.ac.asojuku.st.idea_designer.R
 import jp.ac.asojuku.st.idea_designer.db.BSRealm
 import jp.ac.asojuku.st.idea_designer.db.IdeaRealm
@@ -62,17 +63,19 @@ class ViewAdapter(private val list: List<RowData>, val ideaListener: IdeaListene
                 ideaListener.onClickRowIdea(it, list[position], holder.buttonAgreeView, holder.buttonAgainstView)
                 changeVisibility(holder.frameIdeaView)
             }
-            // リサイクラービューの追加機能部がタップされた時、インターフェースメソッドを実行し、追加機能の追加とコピーボタンを表示する。
+            // リサイクラービューの追加機能部がタップされた時、インターフェースメソッドを実行し、追加機能の追加ボタンと追加機能の削除ボタン、コピーボタンを表示する。
             holder.detailView.setOnItemClickListener { parent, view, itemPosition, id ->
-                itemLisener.onClickRowItem(position, itemPosition, holder.buttonAdditemView, holder.buttonCopyView, holder.frameItemView)
+                itemLisener.onClickRowItem(position, itemPosition, holder.buttonAdditemView, holder.buttonDeleteView, holder.buttonCopyView, holder.frameItemView)
                 changeVisibility(holder.frameItemView)
             }
         }
         holder.buttonMakeDialog.setOnClickListener {
             // アイテムがないアイデアをダイアログ表示しようとした時は、Toastでエラーメッセージ
-            if(array.size == 0){
-                Toast.makeText(context, "機能を追加してください", Toast.LENGTH_LONG).show()
-                return@setOnClickListener
+            if(array.size == 0) {
+                if (context.javaClass == IdeaListActivity::class.java) {
+                    Toast.makeText(context, "機能を追加してください", Toast.LENGTH_LONG).show()
+                    return@setOnClickListener
+                }
             }
             val inflater = LayoutInflater.from(context).inflate(R.layout.dialog, null, false)
             val dialog_idea = inflater.dialog_idea
@@ -106,22 +109,28 @@ class ViewAdapter(private val list: List<RowData>, val ideaListener: IdeaListene
 
             // リストビューの中身を設定し、アダプターとして登録
             val listViewAdapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, array)
-
             dialog_list.adapter = listViewAdapter
-            // アイテムのリストがタップされた時、アイテムエクスポートボタンを表示し、
-            // エクスポートボタンのタップ時の処理（Realmに登録する処理）を再設定する（タップしたアイテムが登録されるようにする）
-            dialog_list.setOnItemClickListener { adapterView, view, i, l ->
-                var dialog_detail = list[position].detailList.get(i).detail
-                if(dialog_detail == ""){dialog_detail = "補足説明はありません。"}
-                dialog_text_detail.setText(dialog_detail)
-                changeVisibility(dialog_text_detail)
-                changeVisibility(dialog_buton_additem)
-                dialog_buton_additem.setOnClickListener {
-                    realm.setItemToRealm(list[position].detailList.get(i))
-                    changeVisibility(dialog_buton_additem)
 
+            // ラスト画面かつ、中身が入っていない場合は、ダイアログのリストタップ時処理を設定しないする
+            if(context.javaClass == IdeaListActivity::class.java || context.javaClass == LastIdeaListActivity::class.java && array.size != 0) {
+                // アイテムのリストがタップされた時、アイテムエクスポートボタンを表示し、
+                // エクスポートボタンのタップ時の処理（Realmに登録する処理）を再設定する（タップしたアイテムが登録されるようにする）
+                dialog_list.setOnItemClickListener { adapterView, view, i, l ->
+                    var dialog_detail = list[position].detailList.get(i).detail
+                    if (dialog_detail == "") {
+                        dialog_detail = "補足説明はありません。"
+                    }
+                    dialog_text_detail.setText(dialog_detail)
+                    changeVisibility(dialog_text_detail)
+                    changeVisibility(dialog_buton_additem)
+                    dialog_buton_additem.setOnClickListener {
+                        realm.setItemToRealm(list[position].detailList.get(i))
+                        changeVisibility(dialog_buton_additem)
+                        changeVisibility(dialog_text_detail)
+                    }
                 }
             }
+
             // ダイアログを生成
             val dialog = AlertDialog.Builder(context).apply {
                 setView(inflater)
@@ -153,7 +162,7 @@ class ViewAdapter(private val list: List<RowData>, val ideaListener: IdeaListene
         fun onClickRowIdea(tappedView: View, rowModel: RowData, agreeButton: Button, againstButton: Button)
     }
     interface ItemLisener {
-        fun onClickRowItem(listPosition: Int, itemPosition: Int, addButton: Button, copyButton: Button, frameItemView: FrameLayout)
+        fun onClickRowItem(listPosition: Int, itemPosition: Int, addButton: Button, deleteButton:Button, copyButton: Button, frameItemView: FrameLayout)
     }
 
 }

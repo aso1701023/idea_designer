@@ -91,7 +91,7 @@
             app:layout_constraintEnd_toEndOf="@+id/recycler_image_background"
             app:layout_constraintHorizontal_bias="0.493"
             app:layout_constraintBottom_toBottomOf="@+id/recycler_image_background"
-            android:id="@+id/recycler_frame_itemTapped" tools:visibility="invisible">
+            android:id="@+id/recycler_frame_itemTapped" tools:visibility="visible">
 
         <ImageView
                 android:layout_width="match_parent"
@@ -107,7 +107,11 @@
                     android:layout_height="wrap_content" android:id="@+id/recycler_button_addItem"
                     android:layout_weight="1"/>
             <Button
-                    android:id="@+id/recycler_button_ideaCopy" android:layout_width="wrap_content"
+                    android:text="機能を削除"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:id="@+id/recycler_button_deleteItem" android:layout_weight="1"/>
+            <Button
+                    android:id="@+id/recycler_button_copyItem" android:layout_width="wrap_content"
                     android:layout_height="wrap_content" android:layout_weight="1" android:text="機能をコピー"/>
         </LinearLayout>
     </FrameLayout>
