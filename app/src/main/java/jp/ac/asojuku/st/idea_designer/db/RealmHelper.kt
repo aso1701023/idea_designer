@@ -25,19 +25,19 @@ class RealmHelper(val context:Context) {
         realm.executeTransaction {
             try {
                 bsLastIndex = realm.where(GlobalIntDataRealm::class.java).equalTo("data_id", 1).findFirst().value
-            } catch (e: IllegalArgumentException) {
+            } catch (e: NullPointerException) {
                 val bs = realm.createObject(GlobalIntDataRealm::class.java, 1)
                 bs.value = -1
             }
             try {
                 ideaLastIndex = realm.where(GlobalIntDataRealm::class.java).equalTo("data_id", 2).findFirst().value
-            } catch (e: IllegalArgumentException) {
+            } catch (e: NullPointerException) {
                 val idea = realm.createObject(GlobalIntDataRealm::class.java, 2)
                 idea.value = -1
             }
             try {
                 itemLastIndex = realm.where(GlobalIntDataRealm::class.java).equalTo("data_id", 3).findFirst().value
-            } catch (e: IllegalArgumentException) {
+            } catch (e: NullPointerException) {
                 val item = realm.createObject(GlobalIntDataRealm::class.java, 3)
                 item.value = -1
             }
@@ -103,6 +103,5 @@ class RealmHelper(val context:Context) {
     }
     fun close(){
         realm.close()
-        this.close()
     }
 }

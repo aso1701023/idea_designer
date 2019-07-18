@@ -18,6 +18,6 @@
             android:text="title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" tools:layout_editor_absoluteY="207dp"
-            tools:layout_editor_absoluteX="175dp" android:id="@+id/title"/>
+            tools:layout_editor_absoluteX="175dp" android:id="@+id/make_edit_thema"/>
 
 </android.support.constraint.ConstraintLayout>

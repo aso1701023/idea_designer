@@ -9,10 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.Toast
+import android.widget.*
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.Sort
@@ -27,6 +24,7 @@ import jp.ac.asojuku.st.idea_designer.instance.BS
 import jp.ac.asojuku.st.idea_designer.instance.Idea
 import kotlinx.android.synthetic.main.dialog.view.*
 import java.lang.IndexOutOfBoundsException
+import java.text.FieldPosition
 
 class ViewAdapter(private val list: List<RowData>, val ideaListener: IdeaListener, val itemLisener: ItemLisener, val context:Context, val bs: BS?) : RecyclerView.Adapter<ViewHolder>() {
     override fun onBindViewHolder(p0: ViewHolder, p1: Int) {
@@ -52,7 +50,6 @@ class ViewAdapter(private val list: List<RowData>, val ideaListener: IdeaListene
             val listViewAdapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, arrayListOf("追加機能がありません"))
             holder.detailView.adapter = listViewAdapter
         }else{
-            Log.d("test",payloads.size.toString())
             val listViewAdapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, array)
             holder.detailView.adapter = listViewAdapter
         }
@@ -60,8 +57,20 @@ class ViewAdapter(private val list: List<RowData>, val ideaListener: IdeaListene
         if(context.javaClass == IdeaListActivity::class.java ) {
             // リサイクラービューのアイデア部がタップされた時、インターフェースメソッドを実行し、評価するボタンを表示する。
             holder.titleView.setOnClickListener {
-                ideaListener.onClickRowIdea(it, list[position], holder.buttonAgreeView, holder.buttonAgainstView)
-                changeVisibility(holder.frameIdeaView)
+                ideaListener.onClickRowIdea(position, list[position], holder.buttonAgreeView, holder.buttonAgainstView, holder.commentTextView)
+                // 悪い評価を行わない設定の時
+                if (bs != null) {
+                    when(bs.estimate_flg){
+                        0 -> {return@setOnClickListener}
+                        1 -> {
+                            changeVisibility(holder.frameIdeaView)
+                            holder.buttonAgainstView.visibility = View.GONE
+                        }
+                        2 -> {
+                            changeVisibility(holder.frameIdeaView)
+                        }
+                    }
+                }
             }
             // リサイクラービューの追加機能部がタップされた時、インターフェースメソッドを実行し、追加機能の追加ボタンと追加機能の削除ボタン、コピーボタンを表示する。
             holder.detailView.setOnItemClickListener { parent, view, itemPosition, id ->
@@ -107,12 +116,13 @@ class ViewAdapter(private val list: List<RowData>, val ideaListener: IdeaListene
                 changeVisibility(dialog_text_detail)
             }
 
-            // リストビューの中身を設定し、アダプターとして登録
-            val listViewAdapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, array)
-            dialog_list.adapter = listViewAdapter
 
             // ラスト画面かつ、中身が入っていない場合は、ダイアログのリストタップ時処理を設定しないする
             if(context.javaClass == IdeaListActivity::class.java || context.javaClass == LastIdeaListActivity::class.java && array.size != 0) {
+                // リストビューの中身を設定し、アダプターとして登録
+                val listViewAdapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, array)
+                dialog_list.adapter = listViewAdapter
+
                 // アイテムのリストがタップされた時、アイテムエクスポートボタンを表示し、
                 // エクスポートボタンのタップ時の処理（Realmに登録する処理）を再設定する（タップしたアイテムが登録されるようにする）
                 dialog_list.setOnItemClickListener { adapterView, view, i, l ->
@@ -129,6 +139,9 @@ class ViewAdapter(private val list: List<RowData>, val ideaListener: IdeaListene
                         changeVisibility(dialog_text_detail)
                     }
                 }
+            }else{
+                val listViewAdapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, arrayOf("追加機能はありません"))
+                dialog_list.adapter = listViewAdapter
             }
 
             // ダイアログを生成
@@ -159,7 +172,7 @@ class ViewAdapter(private val list: List<RowData>, val ideaListener: IdeaListene
     }
 
     interface IdeaListener {
-        fun onClickRowIdea(tappedView: View, rowModel: RowData, agreeButton: Button, againstButton: Button)
+        fun onClickRowIdea(tappedPosition: Int, rowModel: RowData, agreeButton: Button, againstButton: Button, commentText:EditText)
     }
     interface ItemLisener {
         fun onClickRowItem(listPosition: Int, itemPosition: Int, addButton: Button, deleteButton:Button, copyButton: Button, frameItemView: FrameLayout)

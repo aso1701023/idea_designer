@@ -14,7 +14,7 @@ class BS(thema:String,time: Array<Int>,estimate:Int) :Serializable{
 
     var time_text:TextView? = null
 
-    var estimate_flg:Int =  0 // 0:設定無し　1:良いコメント欄有り　2:1+悪いコメント欄有り
+    var estimate_flg:Int =  estimate // 0:設定無し　1:良いコメント欄有り　2:1+悪いコメント欄有り
 
     var idea_list:ArrayList<Idea> = ArrayList()
 

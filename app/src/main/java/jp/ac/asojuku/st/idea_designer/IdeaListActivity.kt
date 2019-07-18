@@ -7,8 +7,9 @@ import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.FrameLayout
-import android.widget.Toast
+import jp.ac.asojuku.st.idea_designer.db.RealmHelper
 import jp.ac.asojuku.st.idea_designer.instance.BS
 import jp.ac.asojuku.st.idea_designer.instance.Coroutine
 import jp.ac.asojuku.st.idea_designer.instance.Item
@@ -52,6 +53,13 @@ class IdeaListActivity : AppCompatActivity() {
                     collectListDatachanged()
                 }
             },
+            object : CollectionAdapter.ExportListener{
+                override fun onClickRowExport(exportPosition: Int) {
+                    val realm = RealmHelper(this@IdeaListActivity)
+                    realm.realmInit()
+                    realm.setItemToRealm(itemArray[exportPosition])
+                }
+            },
             object  : CollectionAdapter.OnTapListener{
                 override fun onTapRow(tapPosition: Int) {
                     when(modeID){
@@ -67,8 +75,6 @@ class IdeaListActivity : AppCompatActivity() {
                             ///////////////////////////////////////////////////////////////////////////
                             ////////////////////////////一時保存リストタップ時処理/////////////////////////
                             ///////////////////////////////////////////////////////////////////////////
-
-                            ////////////あと、ブレストの赤背景をタップした時、ダイアログで一覧表示したい
                             return
                         }
                     }
@@ -103,7 +109,7 @@ class IdeaListActivity : AppCompatActivity() {
     }
 
     // リサイクラービューのアイデア欄をタップした時、評価ボタンを表示する。
-    fun onClickRowIdea(tappedView: View, rowData: RowData, agreeButton:Button, againstButton: Button) {
+    fun onClickRowIdea(tappedPosition: Int, rowData: RowData, agreeButton:Button, againstButton: Button, commentText: EditText) {
         // 評価:良い ボタンを押した時の処理
         agreeButton.setOnClickListener {
 
@@ -160,6 +166,13 @@ class IdeaListActivity : AppCompatActivity() {
                     collectListDatachanged()
                 }
             },
+            object : CollectionAdapter.ExportListener{
+                override fun onClickRowExport(exportPosition: Int) {
+                    val realm = RealmHelper(this@IdeaListActivity)
+                    realm.realmInit()
+                    realm.setItemToRealm(itemArray[exportPosition])
+                }
+            },
             object  : CollectionAdapter.OnTapListener{
                 override fun onTapRow(tapPosition: Int) {
                     bs.idea_list.get(setItemPosition).add_item(itemArray.get(tapPosition))
@@ -190,8 +203,8 @@ class IdeaListActivity : AppCompatActivity() {
         val adapter = ViewAdapter(
             dataList,
             object : ViewAdapter.IdeaListener {
-                override fun onClickRowIdea(tappedView: View, rowModel: RowData, agreeButton:Button, againstButton: Button) {
-                    this@IdeaListActivity.onClickRowIdea(tappedView, rowModel, agreeButton, againstButton)
+                override fun onClickRowIdea(tappedPosition: Int, rowModel: RowData, agreeButton:Button, againstButton: Button, commentText:EditText) {
+                    this@IdeaListActivity.onClickRowIdea(tappedPosition, rowModel, agreeButton, againstButton, commentText)
                 }
             },
             object : ViewAdapter.ItemLisener{

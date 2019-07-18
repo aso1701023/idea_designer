@@ -59,7 +59,7 @@
             android:layout_height="match_parent" android:id="@+id/recycler_frame_ideaTapped"
             app:layout_constraintEnd_toEndOf="@+id/recycler_image_background"
             app:layout_constraintStart_toStartOf="@+id/recycler_image_background"
-            tools:visibility="gone"
+            tools:visibility="visible"
             app:layout_constraintBottom_toBottomOf="@+id/recycler_frame_itemTapped">
 
         <ImageView
@@ -67,21 +67,34 @@
                 android:layout_height="match_parent" app:srcCompat="@android:color/holo_green_dark"
                 android:id="@+id/imageView6"/>
         <LinearLayout
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:visibility="visible"
-                android:id="@+id/recycler_linear_ideaTapped">
-            <Button
-                    android:text="よき"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:id="@+id/recycler_button_agree"
-                    android:layout_weight="1"/>
-            <Button
-                    android:text="よくなき"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:id="@+id/recycler_button_against"
-                    android:layout_weight="1"/>
+                android:layout_height="match_parent">
+            <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:background="@drawable/edit_thema"
+                    android:ems="10"
+                    android:id="@+id/recycler_edit_comment" android:layout_marginTop="4dp" android:layout_marginRight="4dp"
+                    android:layout_marginLeft="4dp" android:hint="コメント"/>
+            <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:visibility="visible"
+                    android:id="@+id/recycler_linear_ideaTapped">
+                <Button
+                        android:text="よき"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:id="@+id/recycler_button_agree"
+                        android:layout_weight="1"/>
+                <Button
+                        android:text="よくなき"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:id="@+id/recycler_button_against"
+                        android:layout_weight="1"/>
+            </LinearLayout>
         </LinearLayout>
     </FrameLayout>
     <FrameLayout
@@ -91,7 +104,7 @@
             app:layout_constraintEnd_toEndOf="@+id/recycler_image_background"
             app:layout_constraintHorizontal_bias="0.493"
             app:layout_constraintBottom_toBottomOf="@+id/recycler_image_background"
-            android:id="@+id/recycler_frame_itemTapped" tools:visibility="visible">
+            android:id="@+id/recycler_frame_itemTapped" tools:visibility="gone">
 
         <ImageView
                 android:layout_width="match_parent"
@@ -109,7 +122,8 @@
             <Button
                     android:text="機能を削除"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:id="@+id/recycler_button_deleteItem" android:layout_weight="1"/>
+                    android:layout_height="wrap_content" android:id="@+id/recycler_button_deleteItem"
+                    android:layout_weight="1"/>
             <Button
                     android:id="@+id/recycler_button_copyItem" android:layout_width="wrap_content"
                     android:layout_height="wrap_content" android:layout_weight="1" android:text="機能をコピー"/>

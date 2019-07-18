@@ -14,5 +14,8 @@ class SwichActivity : AppCompatActivity() {
         buresuto_button.setOnClickListener {
             startActivity<MakeActivity>()
         }
+        switch_button_entry.setOnClickListener {
+            startActivity<EntryActivity>()
+        }
     }
 }

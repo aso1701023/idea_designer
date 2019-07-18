@@ -5,6 +5,8 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'realm-android'
 
+apply plugin: 'com.google.gms.google-services'
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -51,5 +53,8 @@ dependencies {
     def parcelerVer = '1.1.10'
     annotationProcessor "org.parceler:parceler:${parcelerVer}"
     kapt "org.parceler:parceler:${parcelerVer}"
+
+    implementation 'com.google.firebase:firebase-core:16.0.0'
+    implementation 'com.google.firebase:firebase-database:15.0.0'
 
 }

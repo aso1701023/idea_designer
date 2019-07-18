@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.FrameLayout
 import jp.ac.asojuku.st.idea_designer.db.RealmHelper
 import jp.ac.asojuku.st.idea_designer.instance.BS
@@ -13,7 +14,7 @@ import jp.ac.asojuku.st.idea_designer.instance.Item
 import jp.ac.asojuku.st.idea_designer.instance.inner
 import jp.ac.asojuku.st.idea_designer.view.RowData
 import jp.ac.asojuku.st.idea_designer.view.ViewAdapter
-import kotlinx.android.synthetic.main.activity_idea_list.*
+import kotlinx.android.synthetic.main.activity_last_idea_list.*
 import org.jetbrains.anko.startActivity
 import java.io.Serializable
 
@@ -27,6 +28,11 @@ class LastIdeaListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_last_idea_list)
         init()
+
+        lastidea_button_finish.setOnClickListener {
+            startActivity<StartActivity>()
+            finish()
+        }
     }
     fun init(){
         // 前画面から受け取ったBSのインスタンス
@@ -66,7 +72,7 @@ class LastIdeaListActivity : AppCompatActivity() {
         val adapter = ViewAdapter(
             dataList,
             object : ViewAdapter.IdeaListener {
-                override fun onClickRowIdea(tappedView: View, rowModel: RowData, agreeButton:Button, againstButton: Button) {
+                override fun onClickRowIdea(tappedPosition: Int, rowModel: RowData, agreeButton:Button, againstButton: Button, commentText: EditText) {
                     fun (){}
                 }
             },
@@ -83,17 +89,9 @@ class LastIdeaListActivity : AppCompatActivity() {
         idealist_recyclerView.adapter = adapter
     }
 
-    inner class Inner: inner(), Serializable {
-        override fun intent() {
-            bs.time_text = null
-            startActivity<IdeaListActivity>("bs" to bs)
-            finish()
-        }
-    }
-
     override fun onDestroy() {
-        super.onDestroy()
         realm.close()
+        super.onDestroy()
     }
 
 
