@@ -50,7 +50,7 @@ class IdeaListActivity : AppCompatActivity() {
             object : CollectionAdapter.DeleteListener {
                 override fun onClickRowDelete(deletePosirion: Int) {
                     itemArray.removeAt(deletePosirion)
-                    collectListDatachanged()
+                    collectListDataChanged()
                 }
             },
             object : CollectionAdapter.ExportListener{
@@ -145,14 +145,14 @@ class IdeaListActivity : AppCompatActivity() {
             }
             modeID = 1
             itemArray.add(bs.idea_list.get(listPosition).item_list.get(itemPosition))
-            collectListDatachanged()
+            collectListDataChanged()
             idealist_linear_correctItem.visibility = View.VISIBLE
             recycler_frame_itemTapped.visibility = View.GONE
             frameItemView.visibility = View.GONE
         }
     }
     // collectListの内容が変更された時、再描画を行う。
-    fun collectListDatachanged(){
+    fun collectListDataChanged(){
         val listData = ArrayList<CollectionRowData>()
         var data:CollectionRowData
         for (item in itemArray) {
@@ -163,7 +163,7 @@ class IdeaListActivity : AppCompatActivity() {
             object : CollectionAdapter.DeleteListener {
                 override fun onClickRowDelete(deletePosirion: Int) {
                     itemArray.removeAt(deletePosirion)
-                    collectListDatachanged()
+                    collectListDataChanged()
                 }
             },
             object : CollectionAdapter.ExportListener{

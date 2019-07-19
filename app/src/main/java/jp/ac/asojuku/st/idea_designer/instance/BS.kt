@@ -5,7 +5,9 @@ import android.widget.TextView
 import java.io.Serializable
 
 
-class BS(thema:String,time: Array<Int>,estimate:Int) :Serializable{
+class BS(thema:String,time: Array<Int>,estimate:Int, bsID:String, myMemberID:String) :Serializable{
+    val bsID = bsID //FirebaseDatabase内での主キー
+    val myMemberID = myMemberID //FirebaseDatabaseに登録している自分のMemberID
 
     val thema = thema //テーマ
     var time_array = time //各画面の制限時間
@@ -47,8 +49,8 @@ class BS(thema:String,time: Array<Int>,estimate:Int) :Serializable{
         idea_list.removeAt(index)
         for(i in index..idea_list.lastIndex){
             Log.d("test1",i.toString())
-            Log.d("test2",idea_list.get(i).index.toString())
-            idea_list.get(i).index = i
+            Log.d("test2", idea_list[i].index.toString())
+            idea_list[i].index = i
         }
     }
 }

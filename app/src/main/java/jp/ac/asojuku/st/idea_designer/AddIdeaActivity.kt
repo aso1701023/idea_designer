@@ -8,18 +8,15 @@ import android.view.MotionEvent
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
-import jp.ac.asojuku.st.idea_designer.instance.BS
-import jp.ac.asojuku.st.idea_designer.instance.Coroutine
-import jp.ac.asojuku.st.idea_designer.instance.Item
-import jp.ac.asojuku.st.idea_designer.instance.inner
+import com.google.firebase.database.*
+import jp.ac.asojuku.st.idea_designer.instance.*
 import kotlinx.android.synthetic.main.activity_add_idea.*
 import java.io.Serializable
 import org.jetbrains.anko.startActivity
-import jp.ac.asojuku.st.idea_designer.instance.FlickCheck
 import kotlinx.android.synthetic.main.second_view.view.*
 
 
-class AddIdeaActivity : AppCompatActivity() {
+open class AddIdeaActivity : AppCompatActivity() {
     lateinit var bs: BS
     lateinit var coroutine: Coroutine
     var inFromRightAnimation: Animation? = null
@@ -36,7 +33,31 @@ class AddIdeaActivity : AppCompatActivity() {
         coroutine = Coroutine(bs, Handler(),Inner())
         coroutine.start()
 
-        idealist_text_thema.setText(bs.thema)
+        val database = FirebaseDatabase.getInstance()
+        var ref = database.reference.child(bs.bsID).child("member")
+        ref.addListenerForSingleValueEvent(object :ValueEventListener{
+            override fun onCancelled(p0: DatabaseError?) {}
+
+            override fun onDataChange(p0: DataSnapshot?) {
+                bs.idea_list = ArrayList()
+                p0!!.children.forEach {
+                    var index = 0
+                    Log.d("testtezt",it.child("ideaList").child("1").child("subject").toString())
+                    it.child("ideaList").children.forEach { ds ->
+                        Idea(
+                            bs,
+                            ds.child("subject").value.toString(),
+                            ds.child("detail").value.toString()
+                        ).index = index
+                        index ++
+                    }
+                }
+                for(i in bs.idea_list) {
+                    Log.d("test",i.idea + " : " + i.detail)
+                }
+            }
+
+        })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +67,8 @@ class AddIdeaActivity : AppCompatActivity() {
         setAnimations()
         print_idea(print_num)
         first_second = 0
+
+        idealist_text_thema.text = "テーマ : " + bs.thema
 
         var viewFlipper = viewFlipper
 
@@ -72,11 +95,6 @@ class AddIdeaActivity : AppCompatActivity() {
         }
 
     }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        return super.onTouchEvent(event)
-    }
-
 
     fun change_idea(rl:Int){
         try {
@@ -124,13 +142,24 @@ class AddIdeaActivity : AppCompatActivity() {
     inner class Inner:inner(), Serializable {
         override fun intent() {
             bs.time_text = null
+            val database = FirebaseDatabase.getInstance()
+            var ref: DatabaseReference = database.reference.child(bs.bsID).child("member").child(bs.myMemberID).child("ideaList")
+            for(idea in bs.idea_list){
+                for(item in idea.item_list) {
+                    val setData: Map<String, String> = mapOf<String, String>(
+                        "subject" to item.item,
+                        "detail" to item.detail
+                    )
+                    ref.child(idea.index.toString()).child("itemList").child(item.index.toString()).setValue(setData)
+                }
+            }
             startActivity<IdeaListActivity>("bs" to bs)
             coroutine.destroy()
             finish()
         }
     }
 
-    protected fun setAnimations() {
+    fun setAnimations() {
         inFromRightAnimation =
             AnimationUtils.loadAnimation(this, R.anim.slide_in_from_right);
         inFromLeftAnimation =

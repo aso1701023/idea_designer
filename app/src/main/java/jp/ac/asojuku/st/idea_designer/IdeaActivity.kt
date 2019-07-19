@@ -4,8 +4,11 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.widget.Toast
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import jp.ac.asojuku.st.idea_designer.instance.*
 import kotlinx.android.synthetic.main.activity_idea.*
+import kotlinx.android.synthetic.main.activity_make.*
 import org.jetbrains.anko.startActivity
 import java.io.Serializable
 
@@ -33,6 +36,7 @@ class IdeaActivity : AppCompatActivity(),Serializable{
                 create_idea()
             }
         }
+        idealist_text_thema.text = "テーマ : " + bs.thema
     }
 
     fun create_idea(){
@@ -44,6 +48,15 @@ class IdeaActivity : AppCompatActivity(),Serializable{
     inner class Inner:inner(),Serializable{
         override fun intent() {
             bs.time_text = null
+            val database = FirebaseDatabase.getInstance()
+            var ref: DatabaseReference = database.reference.child(bs.bsID).child("member").child(bs.myMemberID).child("ideaList")
+            for(idea in bs.idea_list){
+                val setData:Map<String,String> = mapOf<String, String>(
+                    "subject" to idea.idea,
+                    "detail" to idea.detail
+                )
+                ref.child(idea.index.toString()).setValue(setData)
+            }
             startActivity<AddIdeaActivity>("bs" to bs)
             coroutine.destroy()
             finish()

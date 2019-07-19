@@ -7,12 +7,11 @@
 >
     <TextView
             android:background="@drawable/edit_main"
-            android:text="idea"
             android:layout_width="280dp"
             android:layout_height="80dp"
             android:layout_gravity="center_horizontal"
             android:id="@+id/recycler_text_idea" android:layout_marginTop="10dp"
-            android:gravity="center" android:lines="3" android:isScrollContainer="false"/>
+            android:gravity="center" android:lines="3" android:isScrollContainer="false" android:text="アイデアがありません"/>
     <TextView
             android:background="@drawable/edit_main"
             android:layout_width="280dp"
@@ -20,5 +19,5 @@
             android:layout_gravity="center_horizontal"
             android:id="@+id/recycler_listView_detail" android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp" android:lines="5"
-            android:text="detail"/>
+            android:text="補足説明はありません"/>
 </LinearLayout>
