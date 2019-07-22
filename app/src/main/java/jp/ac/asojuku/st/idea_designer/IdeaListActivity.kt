@@ -22,6 +22,7 @@ import jp.ac.asojuku.st.idea_designer.view.RowData
 import jp.ac.asojuku.st.idea_designer.view.ViewAdapter
 import kotlinx.android.synthetic.main.activity_idea_list.*
 import kotlinx.android.synthetic.main.idea_recycler_view.*
+import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.startActivity
 import java.io.Serializable
 
@@ -30,8 +31,6 @@ import java.io.Serializable
 class IdeaListActivity : AppCompatActivity() {
     lateinit var bs: BS
     lateinit var coroutine: Coroutine
-    var adminUpdating = false
-    var adminWaiting = false
     var isFirstLoad = true
 
     // 一時保存中アイテムのリスト
@@ -70,19 +69,25 @@ class IdeaListActivity : AppCompatActivity() {
         var ref = database.reference.child(bs.bsID).child("member")
 
         loadFirebaseData()
-        ref.addValueEventListener(object :ValueEventListener{
+        database.reference.child(bs.bsID).addValueEventListener(object :ValueEventListener{
             override fun onCancelled(p0: DatabaseError?) {}
             override fun onDataChange(p0: DataSnapshot?) {
+                if(bs.isAdmin && p0!!.child("updateRequest").childrenCount > 0){
+                    adminDataUpdate(p0.child("updateRequest"))
+                    return
+                }
                 if(isFirstLoad){
                     isFirstLoad = false
                     return
                 }
-                if(p0!!.child("noUpdateID").value != bs.myMemberID) {
-                    idealist_button_reload.apply {
-                        visibility = View.VISIBLE
-                        setOnClickListener {
-                            visibility = View.GONE
-                            setRecyclerViewData(p0)
+                if(!bs.isAdmin) {
+                    if (p0!!.child("noUpdateID").value != bs.myMemberID) {
+                        idealist_button_reload.apply {
+                            visibility = View.VISIBLE
+                            setOnClickListener {
+                                visibility = View.GONE
+                                setRecyclerViewData(p0.child("member"))
+                            }
                         }
                     }
                 }
@@ -92,66 +97,70 @@ class IdeaListActivity : AppCompatActivity() {
             database.reference.child("${bs.bsID}/updateRequest").addValueEventListener(object :ValueEventListener{
                 override fun onCancelled(p0: DatabaseError?) {}
                 override fun onDataChange(p0: DataSnapshot?) {
-                    if(!adminUpdating){
-                        adminUpdating = true
-                        var noUpdateID = ""
-                        p0!!.children.forEach {updateRow ->
-                            if(p0.childrenCount == 1L){
-                                noUpdateID = updateRow.child("requestUserID").value.toString()
-                            }
-                            if(p0.childrenCount == 0L){
-                                return@onDataChange
-                            }
-                            when(updateRow.child("requestAction").value.toString()) {
-                                "add" -> {
-                                    ref.addListenerForSingleValueEvent(object : ValueEventListener {
-                                        override fun onCancelled(p0: DatabaseError?) {}
-                                        override fun onDataChange(p0: DataSnapshot?) {
-                                            val setMemberID = updateRow.child("setMemberID").value.toString()
-                                            val setIdeaID = updateRow.child("setIdeaID").value.toString()
-                                            val setItemID = updateRow.child("setItemID").value.toString()
-                                            val setItem =
-                                                p0!!.child("$setMemberID/ideaList/$setIdeaID/itemList/$setItemID")
-                                            val setData: Map<String, String> = mapOf(
-                                                "subject" to setItem.child("subject").value.toString(),
-                                                "detail" to setItem.child("detail").value.toString()
-                                            )
-                                            val changeMemberID = updateRow.child("changeMemberID").value.toString()
-                                            val changeIdeaID = updateRow.child("changeIdeaID").value.toString()
-                                            val target =
-                                                ref.child("${updateRow.child("changeMemberID").value}/ideaList")
-                                            ref.child("noUpdateID").setValue(noUpdateID)
-                                            target.child("$changeIdeaID/itemList/${p0.child("$changeMemberID/ideaList/$changeIdeaID/itemList").childrenCount}").setValue(setData)
-                                            database.reference.child("${bs.bsID}/updateRequest/${updateRow.key}").removeValue()
-                                        }
-                                    })
-                                }
-                                "delete" -> {
-                                    val deleteItemAddress =
-                                        "${updateRow.child("deleteMemberID").value}" +
-                                            "/ideaList/${updateRow.child("deleteIdeaID").value}" +
-                                                "/itemList/${updateRow.child("deleteItemID").value}"
-                                    ref.child(deleteItemAddress).let {
-                                        ref.child("noUpdateID").setValue(noUpdateID)
-                                        it.child("subject").removeValue()
-                                        it.child("detail").removeValue()
-                                    }
-                                    database.reference.child("${bs.bsID}/updateRequest/${updateRow.key}").removeValue()
-                                }
-                            }
-                        }
-                        loadFirebaseData()
-                        if(adminWaiting){
-                            adminWaiting = false
-                            database.reference.child("${bs.bsID}/updateRequest").setValue("")
-                        }
-                        adminUpdating = false
-                    }else{
-                        adminWaiting = true
-                    }
+                    adminDataUpdate(p0)
                 }
             })
         }
+    }
+    fun adminDataUpdate(p0: DataSnapshot?):Boolean{
+        val database = FirebaseDatabase.getInstance()
+        var ref = database.reference.child(bs.bsID).child("member")
+        var returnBoolean = true
+
+
+        var noUpdateID = ""
+        p0!!.children.forEach {updateRow ->
+            if(p0.childrenCount == 1L){
+                noUpdateID = updateRow.child("requestUserID").value.toString()
+            }
+            if(p0.childrenCount == 0L){
+                return true
+            }
+            when(updateRow.child("requestAction").value.toString()) {
+                "add" -> {
+                    ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onCancelled(p0: DatabaseError?) {}
+                        override fun onDataChange(p0: DataSnapshot?) {
+                            val setData: Map<String, String> = mapOf(
+                                "subject" to updateRow.child("setSubject").value.toString(),
+                                "detail" to updateRow.child("setDetail").value.toString()
+                            )
+                            val changeMemberID = updateRow.child("changeMemberID").value.toString()
+                            val changeIdeaID = updateRow.child("changeIdeaID").value.toString()
+                            val target = ref.child("${updateRow.child("changeMemberID").value}/ideaList")
+                            database.reference.child("${bs.bsID}/updateRequest/${updateRow.key}").removeValue().addOnSuccessListener {
+                                database.reference.child(bs.bsID).child("noUpdateID").setValue(noUpdateID)
+                                target.child("$changeIdeaID/itemList/${p0!!.child("$changeMemberID/ideaList/$changeIdeaID/itemList").childrenCount}").setValue(setData)
+                                    .addOnSuccessListener { loadFirebaseData() }
+                            }
+                            if(noUpdateID == bs.myMemberID){
+                                returnBoolean = false
+                            }
+                        }
+                    })
+                }
+                "delete" -> {
+                    val deleteItemAddress =
+                        "${updateRow.child("deleteMemberID").value}" +
+                                "/ideaList/${updateRow.child("deleteIdeaID").value}" +
+                                "/itemList/${updateRow.child("deleteItemID").value}"
+                    val setData = mapOf(
+                        "noUpdateID" to noUpdateID,
+                        "needToReload" to "false"
+                    )
+                    database.reference.child(bs.bsID).updateChildren(setData)
+
+                    ref.child(deleteItemAddress).removeValue()
+                    database.reference.child("${bs.bsID}/updateRequest/${updateRow.key}").removeValue()
+                    database.reference.child(bs.bsID).child("needToReload").setValue("true")
+                    if(noUpdateID == bs.myMemberID){
+                        returnBoolean = false
+                    }
+                    loadFirebaseData()
+                }
+            }
+        }
+        return returnBoolean
     }
 
     fun loadFirebaseData(){
@@ -359,7 +368,11 @@ class IdeaListActivity : AppCompatActivity() {
                 override fun onTapRow(tapPosition: Int) {
                     when(modeID){
                         0 -> {
-                            bs.idea_list[setItemPosition].add_item(itemArray[tapPosition])
+                            val newItem = Item(bs.idea_list[setItemPosition],itemArray[tapPosition].item,itemArray[tapPosition].detail)
+//                            bs.idea_list[setItemPosition].add_item(itemArray[tapPosition])
+                            bs.idea_list[setItemPosition].apply {
+                                item_list[item_list.size-1].index = item_list.size-1
+                            }
                             idealist_linear_correctItem.visibility = View.GONE
                             recycler_frame_itemTapped.visibility = View.GONE
                             setRecyclerView()
@@ -372,7 +385,9 @@ class IdeaListActivity : AppCompatActivity() {
                                 "changeIdeaID" to bs.idea_list[setItemPosition].ideaID.toString(),
                                 "setMemberID" to itemArray[tapPosition].postID,
                                 "setIdeaID" to itemArray[tapPosition].ideaID.toString(),
-                                "setItemID" to itemArray[tapPosition].itemID.toString()
+                                "setItemID" to itemArray[tapPosition].itemID.toString(),
+                                "setSubject" to itemArray[tapPosition].item,
+                                "setDetail" to itemArray[tapPosition].detail
                             )
                             post.setValue(setData)
                             return

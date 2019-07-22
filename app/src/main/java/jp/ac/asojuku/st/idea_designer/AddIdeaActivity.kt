@@ -152,7 +152,7 @@ open class AddIdeaActivity : AppCompatActivity() {
                         "subject" to item.item,
                         "detail" to item.detail
                     )
-                    ref.child("${idea.postID}/ideaList/${idea.ideaID}/itemList/${item.itemID}").setValue(setData)
+                    ref.child("${idea.postID}/ideaList/${idea.ideaID}/itemList/${item.index}").setValue(setData)
                 }
             }
             startActivity<IdeaListActivity>("bs" to bs)

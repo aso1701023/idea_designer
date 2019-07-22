@@ -124,40 +124,42 @@ class MakeActivity : AppCompatActivity() {
                     }
                     var availableID = getAvailableID(unAvailableIDList)
 
-                    val setData:Map<String,String> = mapOf<String, String>(
-                        "isHiring" to "true",
-                        "grope_name" to make_edit_gropeName.text.toString(),
-                        "thema" to make_edit_thema.text.toString(),
-                        "time_idea" to timeArray[0].toString(),
-                        "time_join" to timeArray[1].toString(),
-                        "time_review" to timeArray[2].toString(),
-                        "commentConf" to commentConfig.toString()
-                    )
-                    ref.child("$availableID").setValue(setData)
-
-                    val post = ref.child("$availableID").child("member").push()
-                    post.setValue("")
-                    val postID = post.key
-
                     make_text_password.text = "PW : $availableID"
-                    make_button_member.text = "参加待機人数 : " + (p0!!.child("$availableID").child("member").childrenCount-1).toString() + "人"
+                    make_button_member.text = "参加待機人数 : " + (p0!!.child("$availableID").child("member").childrenCount).toString() + "人"
 
                     ref.child("$availableID").child("member").addValueEventListener(object :ValueEventListener{
                         override fun onCancelled(p0: DatabaseError?) {}
                         override fun onDataChange(p0: DataSnapshot?) {
-                            make_button_member.text = "参加待機人数 : " + (p0!!.childrenCount-1).toString() + "人"
+                            make_button_member.text = "参加待機人数 : " + (p0!!.childrenCount).toString() + "人"
                         }
 
                     })
                     make_button_finish.setOnClickListener {
-                        availableID = 3158
                         when {
                             make_edit_gropeName.text.toString() == "" -> Toast.makeText(this@MakeActivity, "グループ名を入力してください", Toast.LENGTH_SHORT).show()
                             make_edit_thema.text.toString() == "" -> Toast.makeText(this@MakeActivity, "テーマを入力してください", Toast.LENGTH_SHORT).show()
                             else -> {
-                                val bs = BS(make_edit_thema.text.toString(),timeArray,commentConfig,availableID.toString(),postID,true)
-                                startActivity<IdeaActivity>("bs" to bs)
-                                finish()
+                                make_button_finish.text = "開始する"
+                                val setData:Map<String,String> = mapOf<String, String>(
+                                    "isHiring" to "true",
+                                    "grope_name" to make_edit_gropeName.text.toString(),
+                                    "thema" to make_edit_thema.text.toString(),
+                                    "time_idea" to timeArray[0].toString(),
+                                    "time_join" to timeArray[1].toString(),
+                                    "time_review" to timeArray[2].toString(),
+                                    "commentConf" to commentConfig.toString()
+                                )
+                                ref.child("$availableID").setValue(setData)
+
+                                val post = ref.child("$availableID").child("member").push()
+                                post.setValue("")
+                                val postID = post.key
+                                make_button_finish.setOnClickListener {
+                                    ref.child("$availableID/isHiring").setValue("false")
+                                    val bs = BS(make_edit_thema.text.toString(),timeArray,commentConfig,availableID.toString(),postID,true)
+                                    startActivity<IdeaActivity>("bs" to bs)
+                                    finish()
+                                }
                             }
                         }
                     }
