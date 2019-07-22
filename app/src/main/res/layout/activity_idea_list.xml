@@ -8,12 +8,11 @@ android:layout_height="match_parent"
 tools:context=".IdeaListActivity">
 
     <Button
-            android:text="Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:id="@+id/button"
-            android:layout_marginBottom="8dp"
+            android:text="保存リスト"
+            android:layout_height="wrap_content" android:id="@+id/idealist_button_listvisivility"
             app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="8dp" android:layout_marginRight="8dp"/>
+            android:layout_marginEnd="8dp" android:layout_marginRight="8dp"
+            android:layout_width="wrap_content"/>
     <ImageView
             android:layout_width="417dp"
             android:layout_height="100dp" app:srcCompat="@color/colorAccent"
@@ -23,7 +22,6 @@ tools:context=".IdeaListActivity">
             app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="1dp" android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintVertical_bias="0.0"/>
     <TextView
-            android:text="てーま"
             android:layout_width="260dp"
             android:layout_height="42dp"
             android:background="@drawable/edit_thema"
@@ -32,7 +30,6 @@ tools:context=".IdeaListActivity">
             app:layout_constraintEnd_toEndOf="@+id/recycler_image_background" android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp" android:gravity="center" android:textSize="18sp"/>
     <TextView
-            android:text="TextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/idealist_text_time" android:layout_marginTop="52dp"
@@ -43,7 +40,7 @@ tools:context=".IdeaListActivity">
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_height="0dp" android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="50dp"
             app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintVertical_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -56,8 +53,9 @@ tools:context=".IdeaListActivity">
             android:layout_height="0dp" app:layout_constraintTop_toBottomOf="@+id/recycler_image_background"
             app:layout_constraintEnd_toEndOf="@+id/idealist_recyclerView" android:layout_marginEnd="2dp"
             android:layout_marginRight="2dp" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginLeft="2dp" android:layout_marginStart="2dp" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent" android:id="@+id/idealist_linear_correctItem">
+            android:layout_marginLeft="2dp" android:layout_marginStart="2dp"
+            app:layout_constraintBottom_toBottomOf="parent" android:id="@+id/idealist_linear_correctItem"
+            android:layout_marginBottom="50dp">
         <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" app:srcCompat="@android:color/transparent"
@@ -68,4 +66,13 @@ tools:context=".IdeaListActivity">
                 android:background="@drawable/shadow_layer"
                 android:id="@+id/idealist_list_correctItem" android:layout_weight="20" tools:visibility="visible"/>
     </LinearLayout>
+    <Button
+            android:text="情報が変更されました"
+            android:layout_height="wrap_content"
+            android:id="@+id/idealist_button_reload"
+            android:layout_width="wrap_content"
+            app:layout_constraintEnd_toStartOf="@+id/idealist_button_listvisivility" android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginLeft="8dp" android:layout_marginStart="8dp" android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 </android.support.constraint.ConstraintLayout>

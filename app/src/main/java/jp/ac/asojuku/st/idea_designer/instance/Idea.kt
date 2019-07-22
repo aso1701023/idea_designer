@@ -17,6 +17,8 @@ class Idea(bs: BS, idea:String, detail:String):Serializable{
     //このアイデアに紐付けしたitem(拡張機能)のリスト
     var item_list:ArrayList<Item> = ArrayList()
 
+    var postID = ""
+    var ideaID = 0
 
     //拡張機能を紐付けし、紐付けた際の添字を返す
     fun add_item(item: Item):Int{

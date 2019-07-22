@@ -2,29 +2,19 @@ package jp.ac.asojuku.st.idea_designer.view
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
-import android.opengl.Visibility
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import io.realm.Realm
-import io.realm.RealmConfiguration
-import io.realm.Sort
 import jp.ac.asojuku.st.idea_designer.IdeaListActivity
 import jp.ac.asojuku.st.idea_designer.LastIdeaListActivity
 import jp.ac.asojuku.st.idea_designer.R
-import jp.ac.asojuku.st.idea_designer.db.BSRealm
-import jp.ac.asojuku.st.idea_designer.db.IdeaRealm
-import jp.ac.asojuku.st.idea_designer.db.ItemRealm
 import jp.ac.asojuku.st.idea_designer.db.RealmHelper
 import jp.ac.asojuku.st.idea_designer.instance.BS
-import jp.ac.asojuku.st.idea_designer.instance.Idea
 import kotlinx.android.synthetic.main.dialog.view.*
-import java.lang.IndexOutOfBoundsException
-import java.text.FieldPosition
+
 
 class ViewAdapter(private val list: List<RowData>, val ideaListener: IdeaListener, val itemLisener: ItemLisener, val context:Context, val bs: BS?) : RecyclerView.Adapter<ViewHolder>() {
     override fun onBindViewHolder(p0: ViewHolder, p1: Int) {
@@ -90,12 +80,12 @@ class ViewAdapter(private val list: List<RowData>, val ideaListener: IdeaListene
             val dialog_idea = inflater.dialog_idea
             val dialog_list = inflater.dialog_list
             val dialog_button_addidea = inflater.dialog_button_addidea
-            val dialog_buton_additem = inflater.dialog_button_additem
+            val dialog_button_additem = inflater.dialog_button_additem
             val dialog_image_close = inflater.dialog_image_close
             val dialog_text_detail = inflater.dialog_text_detail
 
             dialog_button_addidea.visibility = View.GONE
-            dialog_buton_additem.visibility = View.GONE
+            dialog_button_additem.visibility = View.GONE
             dialog_text_detail.visibility = View.GONE
             // Realmの初期設定
             val realm = RealmHelper(context)
@@ -106,14 +96,19 @@ class ViewAdapter(private val list: List<RowData>, val ideaListener: IdeaListene
                 changeVisibility(dialog_button_addidea)
                 var dialog_detail = bs!!.idea_list.get(position).detail
                 if(dialog_detail == ""){dialog_detail = "補足説明はありません。"}
-                dialog_text_detail.setText(dialog_detail)
-                changeVisibility(dialog_text_detail)
+                dialog_text_detail.text = dialog_detail
+                if(dialog_button_additem.visibility == View.VISIBLE) {
+                    changeVisibility(dialog_button_additem)
+                }else {
+                    changeVisibility(dialog_text_detail)
+                }
             }
             // アイデアエクスポートボタンがタップされた時、アイデア全体をRealmに登録する
             dialog_button_addidea.setOnClickListener {
-                realm.setAllItemToRealm(bs!!.idea_list.get(position))
+                realm.setAllItemToRealm(bs!!.idea_list[position])
                 changeVisibility(dialog_button_addidea)
                 changeVisibility(dialog_text_detail)
+                Toast.makeText(context, "アイデアを保存しました", Toast.LENGTH_SHORT).show()
             }
 
 
@@ -126,17 +121,22 @@ class ViewAdapter(private val list: List<RowData>, val ideaListener: IdeaListene
                 // アイテムのリストがタップされた時、アイテムエクスポートボタンを表示し、
                 // エクスポートボタンのタップ時の処理（Realmに登録する処理）を再設定する（タップしたアイテムが登録されるようにする）
                 dialog_list.setOnItemClickListener { adapterView, view, i, l ->
-                    var dialog_detail = list[position].detailList.get(i).detail
+                    var dialog_detail = list[position].detailList[i].detail
                     if (dialog_detail == "") {
                         dialog_detail = "補足説明はありません。"
                     }
-                    dialog_text_detail.setText(dialog_detail)
-                    changeVisibility(dialog_text_detail)
-                    changeVisibility(dialog_buton_additem)
-                    dialog_buton_additem.setOnClickListener {
-                        realm.setItemToRealm(list[position].detailList.get(i))
-                        changeVisibility(dialog_buton_additem)
+                    dialog_text_detail.text = dialog_detail
+                    changeVisibility(dialog_button_additem)
+                    if(dialog_button_addidea.visibility == View.VISIBLE){
+                        changeVisibility(dialog_button_addidea)
+                    }else {
                         changeVisibility(dialog_text_detail)
+                    }
+                    dialog_button_additem.setOnClickListener {
+                        realm.setItemToRealm(list[position].detailList[i])
+                        changeVisibility(dialog_button_additem)
+                        changeVisibility(dialog_text_detail)
+                        Toast.makeText(context, "機能を保存しました", Toast.LENGTH_SHORT).show()
                     }
                 }
             }else{

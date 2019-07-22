@@ -3,17 +3,19 @@ package jp.ac.asojuku.st.idea_designer
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.provider.ContactsContract
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import jp.ac.asojuku.st.idea_designer.db.RealmHelper
-import jp.ac.asojuku.st.idea_designer.instance.BS
-import jp.ac.asojuku.st.idea_designer.instance.Coroutine
-import jp.ac.asojuku.st.idea_designer.instance.Item
-import jp.ac.asojuku.st.idea_designer.instance.inner
+import jp.ac.asojuku.st.idea_designer.instance.*
 import jp.ac.asojuku.st.idea_designer.view.CollectionAdapter
 import jp.ac.asojuku.st.idea_designer.view.CollectionRowData
 import jp.ac.asojuku.st.idea_designer.view.RowData
@@ -28,62 +30,21 @@ import java.io.Serializable
 class IdeaListActivity : AppCompatActivity() {
     lateinit var bs: BS
     lateinit var coroutine: Coroutine
+    var adminUpdating = false
+    var adminWaiting = false
+    var isFirstLoad = true
 
     // 一時保存中アイテムのリスト
     var itemArray = ArrayList<Item>()
     var setItemPosition = 0 // 機能追加時、追加対象のアイデア番号を登録
-    var modeID = 0 // どの機能で一時保存リストを開いているかのID。0:機能追加 1:コピー時 or 手動表示
+    var modeID = 1 // どの機能で一時保存リストを開いているかのID。0:機能追加 1:コピー時 or 手動表示
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_idea_list)
         init()
-        setRecyclerView()
 
-        // 一時保存のリスト作成
-        val listData = ArrayList<CollectionRowData>()
-        var data:CollectionRowData
-        for (item in itemArray) {
-            data = CollectionRowData(item.item)
-            listData.add(data)
-        }
-        val listViewAdapter = CollectionAdapter(this,R.layout.idealist_collectionlist_row,listData,
-            object : CollectionAdapter.DeleteListener {
-                override fun onClickRowDelete(deletePosirion: Int) {
-                    itemArray.removeAt(deletePosirion)
-                    collectListDataChanged()
-                }
-            },
-            object : CollectionAdapter.ExportListener{
-                override fun onClickRowExport(exportPosition: Int) {
-                    val realm = RealmHelper(this@IdeaListActivity)
-                    realm.realmInit()
-                    realm.setItemToRealm(itemArray[exportPosition])
-                }
-            },
-            object  : CollectionAdapter.OnTapListener{
-                override fun onTapRow(tapPosition: Int) {
-                    when(modeID){
-                        0 -> {
-                            bs.idea_list.get(setItemPosition).add_item(itemArray.get(tapPosition))
-                            idealist_linear_correctItem.visibility = View.GONE
-                            recycler_frame_itemTapped.visibility = View.GONE
-                            setRecyclerView()
-                            (idealist_recyclerView.adapter as ViewAdapter).notifyDataSetChanged()
-                            return
-                        }
-                        1 -> {
-                            ///////////////////////////////////////////////////////////////////////////
-                            ////////////////////////////一時保存リストタップ時処理/////////////////////////
-                            ///////////////////////////////////////////////////////////////////////////
-                            return
-                        }
-                    }
-                }
-            })
-        idealist_list_correctItem.adapter = listViewAdapter
+        idealist_text_thema.text = bs.thema
         idealist_linear_correctItem.visibility = View.GONE
-
-
         // 一時保存中のリスト表示中、リスト外をタップしたらリストを非表示にする。
         idealist_image_correctListBlank.setOnClickListener {
             idealist_linear_correctItem.visibility = View.GONE
@@ -93,19 +54,155 @@ class IdeaListActivity : AppCompatActivity() {
             Log.d("test",position.toString())
         }
         // ボタンタップ時、一時保存リストを表示
-        button.setOnClickListener {
+        idealist_button_listvisivility.setOnClickListener {
             modeID = 1
             idealist_linear_correctItem.visibility = View.VISIBLE
         }
     }
 
     // bsとcoroutinを初期化する処理
-    fun init(){
+    fun init() {
         bs = intent.getSerializableExtra("bs") as BS
         bs.set_time(idealist_text_time)
-        coroutine = Coroutine(bs, Handler(),Inner())
+        coroutine = Coroutine(bs, Handler(), Inner())
         coroutine.start()
-        idealist_text_thema.setText(bs.thema)
+        val database = FirebaseDatabase.getInstance()
+        var ref = database.reference.child(bs.bsID).child("member")
+
+        loadFirebaseData()
+        ref.addValueEventListener(object :ValueEventListener{
+            override fun onCancelled(p0: DatabaseError?) {}
+            override fun onDataChange(p0: DataSnapshot?) {
+                if(isFirstLoad){
+                    isFirstLoad = false
+                    return
+                }
+                if(p0!!.child("noUpdateID").value != bs.myMemberID) {
+                    idealist_button_reload.apply {
+                        visibility = View.VISIBLE
+                        setOnClickListener {
+                            visibility = View.GONE
+                            setRecyclerViewData(p0)
+                        }
+                    }
+                }
+            }
+        })
+        if(bs.isAdmin){
+            database.reference.child("${bs.bsID}/updateRequest").addValueEventListener(object :ValueEventListener{
+                override fun onCancelled(p0: DatabaseError?) {}
+                override fun onDataChange(p0: DataSnapshot?) {
+                    if(!adminUpdating){
+                        adminUpdating = true
+                        var noUpdateID = ""
+                        p0!!.children.forEach {updateRow ->
+                            if(p0.childrenCount == 1L){
+                                noUpdateID = updateRow.child("requestUserID").value.toString()
+                            }
+                            if(p0.childrenCount == 0L){
+                                return@onDataChange
+                            }
+                            when(updateRow.child("requestAction").value.toString()) {
+                                "add" -> {
+                                    ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                                        override fun onCancelled(p0: DatabaseError?) {}
+                                        override fun onDataChange(p0: DataSnapshot?) {
+                                            val setMemberID = updateRow.child("setMemberID").value.toString()
+                                            val setIdeaID = updateRow.child("setIdeaID").value.toString()
+                                            val setItemID = updateRow.child("setItemID").value.toString()
+                                            val setItem =
+                                                p0!!.child("$setMemberID/ideaList/$setIdeaID/itemList/$setItemID")
+                                            val setData: Map<String, String> = mapOf(
+                                                "subject" to setItem.child("subject").value.toString(),
+                                                "detail" to setItem.child("detail").value.toString()
+                                            )
+                                            val changeMemberID = updateRow.child("changeMemberID").value.toString()
+                                            val changeIdeaID = updateRow.child("changeIdeaID").value.toString()
+                                            val target =
+                                                ref.child("${updateRow.child("changeMemberID").value}/ideaList")
+                                            ref.child("noUpdateID").setValue(noUpdateID)
+                                            target.child("$changeIdeaID/itemList/${p0.child("$changeMemberID/ideaList/$changeIdeaID/itemList").childrenCount}").setValue(setData)
+                                            database.reference.child("${bs.bsID}/updateRequest/${updateRow.key}").removeValue()
+                                        }
+                                    })
+                                }
+                                "delete" -> {
+                                    val deleteItemAddress =
+                                        "${updateRow.child("deleteMemberID").value}" +
+                                            "/ideaList/${updateRow.child("deleteIdeaID").value}" +
+                                                "/itemList/${updateRow.child("deleteItemID").value}"
+                                    ref.child(deleteItemAddress).let {
+                                        ref.child("noUpdateID").setValue(noUpdateID)
+                                        it.child("subject").removeValue()
+                                        it.child("detail").removeValue()
+                                    }
+                                    database.reference.child("${bs.bsID}/updateRequest/${updateRow.key}").removeValue()
+                                }
+                            }
+                        }
+                        loadFirebaseData()
+                        if(adminWaiting){
+                            adminWaiting = false
+                            database.reference.child("${bs.bsID}/updateRequest").setValue("")
+                        }
+                        adminUpdating = false
+                    }else{
+                        adminWaiting = true
+                    }
+                }
+            })
+        }
+    }
+
+    fun loadFirebaseData(){
+        val database = FirebaseDatabase.getInstance()
+        var ref = database.reference.child(bs.bsID).child("member")
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError?) {}
+            override fun onDataChange(p0: DataSnapshot?) {
+                setRecyclerViewData(p0)
+            }
+        })
+    }
+    fun setRecyclerViewData(p0:DataSnapshot?){
+        bs.idea_list.clear()
+        var itemIndex = 0
+        p0!!.children.forEach {
+            var ideaIndex = 0
+            it.child("ideaList").children.forEach { ideaRow ->
+                val newIdea:Idea = Idea(
+                    bs,
+                    ideaRow.child("subject").value.toString(),
+                    ideaRow.child("detail").value.toString()
+                ).apply {
+                    index = ideaIndex
+                    postID = it.key
+                    ideaID = ideaRow.key.toInt()
+                }
+                ideaRow.child("itemList").children.forEach { itemRow ->
+                    Item(
+                        newIdea,
+                        itemRow.child("subject").value.toString(),
+                        itemRow.child("detail").value.toString()
+                    ).apply {
+                        index = itemIndex
+                        postID = it.key
+                        ideaID = ideaRow.key.toInt()
+                        itemID = itemRow.key.toInt()
+                    }
+                    itemIndex ++
+                }
+                ideaIndex ++
+            }
+        }
+        for(i in bs.idea_list) {
+            Log.d("idea",i.idea + " : " + i.detail)
+            for(j in i.item_list){
+                Log.d("item",j.item + " : " + j.detail)
+            }
+        }
+        setRecyclerView()
+        setListView()
     }
 
     // リサイクラービューのアイデア欄をタップした時、評価ボタンを表示する。
@@ -130,10 +227,23 @@ class IdeaListActivity : AppCompatActivity() {
         }
         //機能削除ボタン。選択したitemをitem_listから削除する
         deleteItemButton.setOnClickListener {
+            if(bs.idea_list[listPosition].item_list.size==0){
+                return@setOnClickListener
+            }
+            frameItemView.visibility = View.GONE
+
+            val post = FirebaseDatabase.getInstance().reference.child("${bs.bsID}/updateRequest").push()
+            val setData:Map<String,String> = mapOf(
+                "requestAction" to "delete",
+                "requestUserID" to bs.myMemberID,
+                "deleteMemberID" to bs.idea_list[listPosition].postID,
+                "deleteIdeaID" to bs.idea_list[listPosition].ideaID.toString(),
+                "deleteItemID" to bs.idea_list[listPosition].item_list[itemPosition].itemID.toString()
+            )
+            post.setValue(setData)
+
             bs.idea_list[listPosition].item_list[itemPosition].remove()
             setRecyclerView()
-            (idealist_recyclerView.adapter as ViewAdapter).notifyDataSetChanged()
-            frameItemView.visibility = View.GONE
         }
 
         // 機能コピーボタン。　選択したアイテムを一時保存し、表示していたアイテムリストタップ時の2つのボタンを非表示にする。
@@ -144,8 +254,9 @@ class IdeaListActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             modeID = 1
-            itemArray.add(bs.idea_list.get(listPosition).item_list.get(itemPosition))
-            collectListDataChanged()
+            itemArray.add(bs.idea_list[listPosition].item_list[itemPosition])
+//            collectListDataChanged()
+            setListView()
             idealist_linear_correctItem.visibility = View.VISIBLE
             recycler_frame_itemTapped.visibility = View.GONE
             frameItemView.visibility = View.GONE
@@ -163,7 +274,8 @@ class IdeaListActivity : AppCompatActivity() {
             object : CollectionAdapter.DeleteListener {
                 override fun onClickRowDelete(deletePosirion: Int) {
                     itemArray.removeAt(deletePosirion)
-                    collectListDataChanged()
+//                    collectListDataChanged()
+                    setListView()
                 }
             },
             object : CollectionAdapter.ExportListener{
@@ -175,11 +287,10 @@ class IdeaListActivity : AppCompatActivity() {
             },
             object  : CollectionAdapter.OnTapListener{
                 override fun onTapRow(tapPosition: Int) {
-                    bs.idea_list.get(setItemPosition).add_item(itemArray.get(tapPosition))
+                    bs.idea_list[setItemPosition].add_item(itemArray[tapPosition])
                     idealist_linear_correctItem.visibility = View.GONE
                     recycler_frame_itemTapped.visibility = View.GONE
                     setRecyclerView()
-                    (idealist_recyclerView.adapter as ViewAdapter).notifyDataSetChanged()
                 }
             })
         idealist_list_correctItem.adapter = listViewAdapter
@@ -191,12 +302,12 @@ class IdeaListActivity : AppCompatActivity() {
         var dataList = mutableListOf<RowData>()
         var data: RowData
         // viewに表示する行ごとのデータを生成
-        for (i in 0..bs.idea_list.size-1) {
+        for (i in 0 until bs.idea_list.size) {
             var detailList = ArrayList<Item>()
-            for(j in 0..bs.idea_list.get(i).item_list.size-1){
-                detailList.add(bs.idea_list.get(i).item_list.get(j))
+            for(j in 0 until bs.idea_list[i].item_list.size){
+                detailList.add(bs.idea_list[i].item_list[j])
             }
-            data = RowData(bs.idea_list.get(i).idea, detailList)
+            data = RowData(bs.idea_list[i].idea, detailList)
             dataList.add(data)
         }
         // アダプターにRowDataのリスト、項目タップ時の処理、コンテキストを渡す。
@@ -218,6 +329,64 @@ class IdeaListActivity : AppCompatActivity() {
         idealist_recyclerView.setHasFixedSize(true)
         idealist_recyclerView.layoutManager = LinearLayoutManager(this)
         idealist_recyclerView.adapter = adapter
+        (idealist_recyclerView.adapter as ViewAdapter).notifyDataSetChanged()
+    }
+
+    fun setListView(){
+        // 一時保存のリスト作成
+        val listData = ArrayList<CollectionRowData>()
+        var data:CollectionRowData
+        for (item in itemArray) {
+            data = CollectionRowData(item.item)
+            listData.add(data)
+        }
+        val listViewAdapter = CollectionAdapter(this,R.layout.idealist_collectionlist_row,listData,
+            object : CollectionAdapter.DeleteListener {
+                override fun onClickRowDelete(deletePosirion: Int) {
+                    itemArray.removeAt(deletePosirion)
+//                    collectListDataChanged()
+                    setListView()
+                }
+            },
+            object : CollectionAdapter.ExportListener{
+                override fun onClickRowExport(exportPosition: Int) {
+                    val realm = RealmHelper(this@IdeaListActivity)
+                    realm.realmInit()
+                    realm.setItemToRealm(itemArray[exportPosition])
+                }
+            },
+            object  : CollectionAdapter.OnTapListener{
+                override fun onTapRow(tapPosition: Int) {
+                    when(modeID){
+                        0 -> {
+                            bs.idea_list[setItemPosition].add_item(itemArray[tapPosition])
+                            idealist_linear_correctItem.visibility = View.GONE
+                            recycler_frame_itemTapped.visibility = View.GONE
+                            setRecyclerView()
+
+                            val post = FirebaseDatabase.getInstance().reference.child("${bs.bsID}/updateRequest").push()
+                            val setData:Map<String,String> = mapOf(
+                                "requestAction" to "add",
+                                "requestUserID" to bs.myMemberID,
+                                "changeMemberID" to bs.idea_list[setItemPosition].postID,
+                                "changeIdeaID" to bs.idea_list[setItemPosition].ideaID.toString(),
+                                "setMemberID" to itemArray[tapPosition].postID,
+                                "setIdeaID" to itemArray[tapPosition].ideaID.toString(),
+                                "setItemID" to itemArray[tapPosition].itemID.toString()
+                            )
+                            post.setValue(setData)
+                            return
+                        }
+                        1 -> {
+                            ///////////////////////////////////////////////////////////////////////////
+                            ////////////////////////////一時保存リストタップ時処理/////////////////////////
+                            ///////////////////////////////////////////////////////////////////////////
+                            return
+                        }
+                    }
+                }
+            })
+        idealist_list_correctItem.adapter = listViewAdapter
     }
     inner class Inner: inner(), Serializable {
         override fun intent() {

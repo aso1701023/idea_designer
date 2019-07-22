@@ -5,7 +5,8 @@ import android.widget.TextView
 import java.io.Serializable
 
 
-class BS(thema:String,time: Array<Int>,estimate:Int, bsID:String, myMemberID:String) :Serializable{
+class BS(thema:String,time: Array<Int>,estimate:Int, bsID:String, myMemberID:String,isAdmin:Boolean) :Serializable{
+    val isAdmin = isAdmin
     val bsID = bsID //FirebaseDatabase内での主キー
     val myMemberID = myMemberID //FirebaseDatabaseに登録している自分のMemberID
 

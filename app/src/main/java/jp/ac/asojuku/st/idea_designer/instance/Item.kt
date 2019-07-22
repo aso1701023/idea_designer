@@ -14,6 +14,10 @@ class Item (idea: Idea, item:String, detail:String):Serializable{
     //DB的に言えば、ideaとidの複合主キー
     var index = idea.add_item(this)
 
+    var postID = ""
+    var ideaID = 0
+    var itemID = 0
+
     //対応アイデアと自身の紐付けを解除する
     fun remove(){
         idea.item_list.removeAt(index)

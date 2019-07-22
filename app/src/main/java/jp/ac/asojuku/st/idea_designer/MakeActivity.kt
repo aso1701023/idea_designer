@@ -155,7 +155,7 @@ class MakeActivity : AppCompatActivity() {
                             make_edit_gropeName.text.toString() == "" -> Toast.makeText(this@MakeActivity, "グループ名を入力してください", Toast.LENGTH_SHORT).show()
                             make_edit_thema.text.toString() == "" -> Toast.makeText(this@MakeActivity, "テーマを入力してください", Toast.LENGTH_SHORT).show()
                             else -> {
-                                val bs = BS(make_edit_thema.text.toString(),timeArray,commentConfig,availableID.toString(),postID)
+                                val bs = BS(make_edit_thema.text.toString(),timeArray,commentConfig,availableID.toString(),postID,true)
                                 startActivity<IdeaActivity>("bs" to bs)
                                 finish()
                             }

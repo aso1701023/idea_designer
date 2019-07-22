@@ -53,19 +53,19 @@ class LastIdeaListActivity : AppCompatActivity() {
     }
     fun onClickRowItem(listPosition: Int, itemPosition: Int){
 
-        Log.d("test",listPosition.toString() + " : "+ itemPosition.toString())
+        Log.d("test", "$listPosition : $itemPosition")
     }
 
     fun setRecyclerView(){
         var dataList = mutableListOf<RowData>()
         var data: RowData
         // viewに表示する行ごとのデータを生成
-        for (i in 0..bs.idea_list.size-1) {
+        for (i in 0 until bs.idea_list.size) {
             var detailList = ArrayList<Item>()
-            for(j in 0..bs.idea_list.get(i).item_list.size-1){
-                detailList.add(bs.idea_list.get(i).item_list.get(j))
+            for(j in 0 until bs.idea_list[i].item_list.size){
+                detailList.add(bs.idea_list[i].item_list[j])
             }
-            data = RowData(bs.idea_list.get(i).idea, detailList)
+            data = RowData(bs.idea_list[i].idea, detailList)
             dataList.add(data)
         }
         // アダプターにRowDataのリスト、項目タップ時の処理、コンテキストを渡す。

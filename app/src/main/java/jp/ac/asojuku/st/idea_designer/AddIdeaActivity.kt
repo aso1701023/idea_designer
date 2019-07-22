@@ -37,26 +37,29 @@ open class AddIdeaActivity : AppCompatActivity() {
         var ref = database.reference.child(bs.bsID).child("member")
         ref.addListenerForSingleValueEvent(object :ValueEventListener{
             override fun onCancelled(p0: DatabaseError?) {}
-
             override fun onDataChange(p0: DataSnapshot?) {
-                bs.idea_list = ArrayList()
+                bs.idea_list.clear()
+                var index = 0
                 p0!!.children.forEach {
-                    var index = 0
-                    Log.d("testtezt",it.child("ideaList").child("1").child("subject").toString())
                     it.child("ideaList").children.forEach { ds ->
                         Idea(
                             bs,
                             ds.child("subject").value.toString(),
                             ds.child("detail").value.toString()
-                        ).index = index
+                        ).apply{
+                            index = index
+                            postID = it.key
+                            ideaID = ds.key.toInt()
+                        }
                         index ++
                     }
                 }
                 for(i in bs.idea_list) {
                     Log.d("test",i.idea + " : " + i.detail)
                 }
+                print_idea(print_num)
+                first_second = 0
             }
-
         })
     }
 
@@ -65,8 +68,7 @@ open class AddIdeaActivity : AppCompatActivity() {
         setContentView(R.layout.activity_add_idea)
         init()
         setAnimations()
-        print_idea(print_num)
-        first_second = 0
+
 
         idealist_text_thema.text = "テーマ : " + bs.thema
 
@@ -122,11 +124,11 @@ open class AddIdeaActivity : AppCompatActivity() {
     fun print_idea(idea_num:Int){
         try{
             if(first_second == 0){
-                secondlayout.recycler_text_idea.setText(bs.idea_list.get(idea_num).idea)
-                secondlayout.recycler_listView_detail.setText(bs.idea_list.get(idea_num).detail)
+                secondlayout.recycler_text_idea.text = bs.idea_list[idea_num].idea
+                secondlayout.recycler_listView_detail.text = bs.idea_list[idea_num].detail
             }else{
-                firstlayout.recycler_text_idea.setText(bs.idea_list.get(idea_num).idea)
-                firstlayout.recycler_listView_detail.setText(bs.idea_list.get(idea_num).detail)
+                firstlayout.recycler_text_idea.text = bs.idea_list[idea_num].idea
+                firstlayout.recycler_listView_detail.text = bs.idea_list[idea_num].detail
             }
 
         }catch (e:IndexOutOfBoundsException){
@@ -135,7 +137,7 @@ open class AddIdeaActivity : AppCompatActivity() {
     }
 
     fun create_item(){
-        Item(bs.idea_list.get(print_num),add_edit_idea.text.toString(), add_edit_detail.text.toString())
+        Item(bs.idea_list[print_num],add_edit_idea.text.toString(), add_edit_detail.text.toString())
         add_edit_idea.setText("")
         add_edit_detail.setText("")
     }
@@ -143,14 +145,14 @@ open class AddIdeaActivity : AppCompatActivity() {
         override fun intent() {
             bs.time_text = null
             val database = FirebaseDatabase.getInstance()
-            var ref: DatabaseReference = database.reference.child(bs.bsID).child("member").child(bs.myMemberID).child("ideaList")
+            var ref: DatabaseReference = database.reference.child(bs.bsID).child("member")
             for(idea in bs.idea_list){
                 for(item in idea.item_list) {
-                    val setData: Map<String, String> = mapOf<String, String>(
+                    val setData: Map<String, String> = mapOf(
                         "subject" to item.item,
                         "detail" to item.detail
                     )
-                    ref.child(idea.index.toString()).child("itemList").child(item.index.toString()).setValue(setData)
+                    ref.child("${idea.postID}/ideaList/${idea.ideaID}/itemList/${item.itemID}").setValue(setData)
                 }
             }
             startActivity<IdeaListActivity>("bs" to bs)
