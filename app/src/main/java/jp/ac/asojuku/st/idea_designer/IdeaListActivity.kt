@@ -32,6 +32,7 @@ class IdeaListActivity : AppCompatActivity() {
     lateinit var bs: BS
     lateinit var coroutine: Coroutine
     var isFirstLoad = true
+    var isFirstQuery = 1
 
     // 一時保存中アイテムのリスト
     var itemArray = ArrayList<Item>()
@@ -66,7 +67,6 @@ class IdeaListActivity : AppCompatActivity() {
         coroutine = Coroutine(bs, Handler(), Inner())
         coroutine.start()
         val database = FirebaseDatabase.getInstance()
-        var ref = database.reference.child(bs.bsID).child("member")
 
         loadFirebaseData()
         database.reference.child(bs.bsID).addValueEventListener(object :ValueEventListener{
@@ -87,14 +87,14 @@ class IdeaListActivity : AppCompatActivity() {
                     return
                 }
                 if(!bs.isAdmin) {
-                    if (p0!!.child("noUpdateID").value != bs.myMemberID && p0!!.child("needToReload").value != "false") {
-                        idealist_button_reload.apply {
-                            visibility = View.VISIBLE
-                            setOnClickListener {
-                                visibility = View.GONE
+                    if (p0!!.child("needToReload").value != "false") {
+//                        idealist_button_reload.apply {
+//                            visibility = View.VISIBLE
+//                            setOnClickListener {
+//                                visibility = View.GONE
                                 setRecyclerViewData(p0.child("member"))
-                            }
-                        }
+//                            }
+//                        }
                     }
                 }
             }
@@ -108,73 +108,114 @@ class IdeaListActivity : AppCompatActivity() {
             })
         }
     }
-    fun adminDataUpdate(p0: DataSnapshot?):Boolean{
+    fun adminDataUpdate(p0: DataSnapshot?) {
         val database = FirebaseDatabase.getInstance()
         var ref = database.reference.child(bs.bsID).child("member")
-        var returnBoolean = true
 
-        var indexMap = mutableMapOf<String,Int>()
+        var indexMap = mutableMapOf<String, Int>()
 
         var noUpdateID = ""
-        p0!!.children.forEach {updateRow ->
-            if(p0.childrenCount == 1L){
-                noUpdateID = updateRow.child("requestUserID").value.toString()
+        when (isFirstQuery) {
+            1 -> {
+                firstUpdateQuery(p0!!)
             }
-            if(p0.childrenCount == 0L){
-                return true
+            0 -> {
+                return
             }
-            when(updateRow.child("requestAction").value.toString()) {
-                "add" -> {
-                    ref.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onCancelled(p0: DatabaseError?) {}
-                        override fun onDataChange(p0: DataSnapshot?) {
-                            val setData: Map<String, String> = mapOf(
-                                "subject" to updateRow.child("setSubject").value.toString(),
-                                "detail" to updateRow.child("setDetail").value.toString()
-                            )
-                            val changeMemberID = updateRow.child("changeMemberID").value.toString()
-                            val changeIdeaID = updateRow.child("changeIdeaID").value.toString()
-                            val target = ref.child("${updateRow.child("changeMemberID").value}/ideaList")
-                            if(indexMap.containsKey("$changeMemberID:$changeIdeaID")){
-                                Log.d("testいんでx", indexMap["$changeMemberID:$changeIdeaID"].toString())
-                                indexMap["$changeMemberID:$changeIdeaID"] = indexMap["$changeMemberID:$changeIdeaID"]!! + 1
-                            }else{
-                                indexMap["$changeMemberID:$changeIdeaID"] = 0
-                            }
-                            database.reference.child("${bs.bsID}/updateRequest/${updateRow.key}").removeValue().addOnSuccessListener {
-                                database.reference.child(bs.bsID).child("noUpdateID").setValue(noUpdateID)
-                                var str = "$changeMemberID:$changeIdeaID"
-                                target.child("$changeIdeaID/itemList/${indexMap[str].toString()}").setValue(setData)
-                                    .addOnSuccessListener { loadFirebaseData() }
-                            }.addOnSuccessListener { database.reference.child("${bs.bsID}/needToReload").setValue("true") }
-                            if(noUpdateID == bs.myMemberID){
-                                returnBoolean = false
-                            }
-                        }
-                    })
-                }
-                "delete" -> {
-                    val deleteItemAddress =
-                        "${updateRow.child("deleteMemberID").value}" +
-                                "/ideaList/${updateRow.child("deleteIdeaID").value}" +
-                                "/itemList/${updateRow.child("deleteItemID").value}"
-                    val setData = mapOf(
-                        "noUpdateID" to noUpdateID,
-                        "needToReload" to "false"
-                    )
-                    database.reference.child(bs.bsID).updateChildren(setData)
-
-                    ref.child(deleteItemAddress).removeValue()
-                    database.reference.child("${bs.bsID}/updateRequest/${updateRow.key}").removeValue()
-                    database.reference.child(bs.bsID).child("needToReload").setValue("true")
-                    if(noUpdateID == bs.myMemberID){
-                        returnBoolean = false
+            else -> {
+                p0!!.children.forEach { updateRow ->
+                    if (p0.childrenCount == 1L) {
+                        noUpdateID = updateRow.child("requestUserID").value.toString()
                     }
-                    loadFirebaseData()
+                    if (p0.childrenCount == 0L) {
+                        return
+                    }
+                    when (updateRow.child("requestAction").value.toString()) {
+                        "add" -> {
+                            ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onCancelled(p0: DatabaseError?) {}
+                                override fun onDataChange(p0: DataSnapshot?) {
+                                    val setData: Map<String, String> = mapOf(
+                                        "subject" to updateRow.child("setSubject").value.toString(),
+                                        "detail" to updateRow.child("setDetail").value.toString()
+                                    )
+                                    val changeMemberID = updateRow.child("changeMemberID").value.toString()
+                                    val changeIdeaID = updateRow.child("changeIdeaID").value.toString()
+                                    val target = ref.child("${updateRow.child("changeMemberID").value}/ideaList")
+                                    if (indexMap.containsKey("$changeMemberID:$changeIdeaID")) {
+                                        Log.d("testいんでx", indexMap["$changeMemberID:$changeIdeaID"].toString())
+                                        indexMap["$changeMemberID:$changeIdeaID"] =
+                                            indexMap["$changeMemberID:$changeIdeaID"]!! + 1
+                                    } else {
+                                        indexMap["$changeMemberID:$changeIdeaID"] = 0
+                                    }
+
+
+                                    database.reference.child(bs.bsID).child("noUpdateID").setValue(noUpdateID)
+                                    var str = "$changeMemberID:$changeIdeaID"
+                                    target.child("$changeIdeaID/itemList/${indexMap[str].toString()}")
+                                        .setValue(setData)
+                                        .addOnSuccessListener { loadFirebaseData() }
+                                        .addOnSuccessListener {
+                                            database.reference.child("${bs.bsID}/needToReload").setValue("true")
+                                        }
+                                }
+                            })
+                        }
+                        "delete" -> {
+                            val deleteItemAddress =
+                                "${updateRow.child("deleteMemberID").value}" +
+                                        "/ideaList/${updateRow.child("deleteIdeaID").value}" +
+                                        "/itemList/${updateRow.child("deleteItemID").value}"
+                            val setData = mapOf(
+                                "noUpdateID" to noUpdateID,
+                                "needToReload" to "false"
+                            )
+                            database.reference.child(bs.bsID).updateChildren(setData)
+
+                            ref.child(deleteItemAddress).removeValue()
+                            database.reference.child("${bs.bsID}/updateRequest/${updateRow.key}").removeValue()
+                            database.reference.child(bs.bsID).child("needToReload").setValue("true")
+                            loadFirebaseData()
+                        }
+                    }
                 }
+                database.reference.child("${bs.bsID}/updateRequest").removeValue()
             }
         }
-        return returnBoolean
+    }
+
+    fun firstUpdateQuery(p0:DataSnapshot){
+        isFirstQuery = 0
+        lateinit var defaultSnapshot:DataSnapshot
+        val database = FirebaseDatabase.getInstance()
+        var ref = database.reference.child(bs.bsID).child("member")
+
+        p0.children.forEach{updateRow ->
+            ref.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError?) {}
+                override fun onDataChange(p0: DataSnapshot?) {
+                    val setData: Map<String, String> = mapOf(
+                        "subject" to updateRow.child("setSubject").value.toString(),
+                        "detail" to updateRow.child("setDetail").value.toString()
+                    )
+                    val changeMemberID = updateRow.child("changeMemberID").value.toString()
+                    val changeIdeaID = updateRow.child("changeIdeaID").value.toString()
+                    val target = ref.child("${updateRow.child("changeMemberID").value}/ideaList")
+
+                    database.reference.child(bs.bsID).child("noUpdateID").setValue(bs.myMemberID)
+                    var str = "$changeMemberID:$changeIdeaID"
+                    target.child("$changeIdeaID/itemList/${p0!!.child("$changeMemberID/ideaList/$changeIdeaID/itemList").childrenCount}")
+                        .setValue(setData)
+                        .addOnSuccessListener { loadFirebaseData() }
+                        .addOnSuccessListener {
+                            database.reference.child("${bs.bsID}/needToReload").setValue("true")
+                    }
+                }
+            })
+        }
+        database.reference.child("${bs.bsID}/updateRequest").removeValue()
+        isFirstQuery = -1
     }
 
     fun loadFirebaseData(){
@@ -264,9 +305,6 @@ class IdeaListActivity : AppCompatActivity() {
                 "deleteItemID" to bs.idea_list[listPosition].item_list[itemPosition].itemID.toString()
             )
             post.setValue(setData)
-
-            bs.idea_list[listPosition].item_list[itemPosition].remove()
-            setRecyclerView()
         }
 
         // 機能コピーボタン。　選択したアイテムを一時保存し、表示していたアイテムリストタップ時の2つのボタンを非表示にする。
