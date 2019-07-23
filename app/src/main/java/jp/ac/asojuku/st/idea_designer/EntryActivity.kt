@@ -21,6 +21,7 @@ class EntryActivity : AppCompatActivity() {
     var isWaiting = false
     var postID = ""
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_entry)
@@ -60,14 +61,15 @@ class EntryActivity : AppCompatActivity() {
                             entry_text_grope.text = p0.child("grope_name").value.toString()
 
                             val post = child.child("member").push()
-                            post.setValue("")
+                            post.setValue(mapOf("isUpdated" to "false"))
                             postID = post.key
                             isWaiting = true
 
                             child.addValueEventListener(object :ValueEventListener{
                                 override fun onCancelled(p0: DatabaseError?) {}
                                 override fun onDataChange(p0: DataSnapshot?) {
-                                    if(p0!!.child("isHiring").value == "false"){
+                                    if(p0!!.child("isHiring").value == "false" && isWaiting == true){
+                                        isWaiting = false
                                         val timeArray = arrayOf(
                                             p0.child("time_idea").value.toString().toInt(),
                                             p0.child("time_join").value.toString().toInt(),
@@ -75,6 +77,7 @@ class EntryActivity : AppCompatActivity() {
                                         )
                                         val bs = BS(p0.child("thema").value.toString(), timeArray,p0.child("commentConf").value.toString().toInt(),p0.key,postID,false)
                                         startActivity<IdeaActivity>("bs" to bs)
+                                        finish()
                                     }
                                 }
 

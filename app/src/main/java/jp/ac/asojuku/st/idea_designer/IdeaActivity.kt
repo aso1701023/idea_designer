@@ -55,7 +55,9 @@ class IdeaActivity : AppCompatActivity(),Serializable{
                     "subject" to idea.idea,
                     "detail" to idea.detail
                 )
-                ref.child(idea.index.toString()).setValue(setData)
+                ref.child(idea.index.toString()).setValue(setData).addOnSuccessListener {
+                    database.reference.child("${bs.bsID}/member/${bs.myMemberID}/isUpdated").setValue("true")
+                }
             }
             startActivity<AddIdeaActivity>("bs" to bs)
             coroutine.destroy()

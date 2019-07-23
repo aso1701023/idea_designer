@@ -25,7 +25,7 @@ import kotlinx.android.synthetic.main.idea_recycler_view.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.startActivity
 import java.io.Serializable
-
+import java.lang.reflect.Array.set
 
 
 class IdeaListActivity : AppCompatActivity() {
@@ -77,11 +77,17 @@ class IdeaListActivity : AppCompatActivity() {
                     return
                 }
                 if(isFirstLoad){
+                    p0!!.child("member").children.forEach {
+                        if(it.child("isUpdated").value.toString() == "false"){
+                            return
+                        }
+                    }
                     isFirstLoad = false
+                    setRecyclerViewData(p0.child("member"))
                     return
                 }
                 if(!bs.isAdmin) {
-                    if (p0!!.child("noUpdateID").value != bs.myMemberID) {
+                    if (p0!!.child("noUpdateID").value != bs.myMemberID && p0!!.child("needToReload").value != "false") {
                         idealist_button_reload.apply {
                             visibility = View.VISIBLE
                             setOnClickListener {
@@ -107,6 +113,7 @@ class IdeaListActivity : AppCompatActivity() {
         var ref = database.reference.child(bs.bsID).child("member")
         var returnBoolean = true
 
+        var indexMap = mutableMapOf<String,Int>()
 
         var noUpdateID = ""
         p0!!.children.forEach {updateRow ->
@@ -128,11 +135,18 @@ class IdeaListActivity : AppCompatActivity() {
                             val changeMemberID = updateRow.child("changeMemberID").value.toString()
                             val changeIdeaID = updateRow.child("changeIdeaID").value.toString()
                             val target = ref.child("${updateRow.child("changeMemberID").value}/ideaList")
+                            if(indexMap.containsKey("$changeMemberID:$changeIdeaID")){
+                                Log.d("testいんでx", indexMap["$changeMemberID:$changeIdeaID"].toString())
+                                indexMap["$changeMemberID:$changeIdeaID"] = indexMap["$changeMemberID:$changeIdeaID"]!! + 1
+                            }else{
+                                indexMap["$changeMemberID:$changeIdeaID"] = 0
+                            }
                             database.reference.child("${bs.bsID}/updateRequest/${updateRow.key}").removeValue().addOnSuccessListener {
                                 database.reference.child(bs.bsID).child("noUpdateID").setValue(noUpdateID)
-                                target.child("$changeIdeaID/itemList/${p0!!.child("$changeMemberID/ideaList/$changeIdeaID/itemList").childrenCount}").setValue(setData)
+                                var str = "$changeMemberID:$changeIdeaID"
+                                target.child("$changeIdeaID/itemList/${indexMap[str].toString()}").setValue(setData)
                                     .addOnSuccessListener { loadFirebaseData() }
-                            }
+                            }.addOnSuccessListener { database.reference.child("${bs.bsID}/needToReload").setValue("true") }
                             if(noUpdateID == bs.myMemberID){
                                 returnBoolean = false
                             }
@@ -368,7 +382,7 @@ class IdeaListActivity : AppCompatActivity() {
                 override fun onTapRow(tapPosition: Int) {
                     when(modeID){
                         0 -> {
-                            val newItem = Item(bs.idea_list[setItemPosition],itemArray[tapPosition].item,itemArray[tapPosition].detail)
+                            Item(bs.idea_list[setItemPosition],itemArray[tapPosition].item,itemArray[tapPosition].detail)
 //                            bs.idea_list[setItemPosition].add_item(itemArray[tapPosition])
                             bs.idea_list[setItemPosition].apply {
                                 item_list[item_list.size-1].index = item_list.size-1
@@ -383,9 +397,6 @@ class IdeaListActivity : AppCompatActivity() {
                                 "requestUserID" to bs.myMemberID,
                                 "changeMemberID" to bs.idea_list[setItemPosition].postID,
                                 "changeIdeaID" to bs.idea_list[setItemPosition].ideaID.toString(),
-                                "setMemberID" to itemArray[tapPosition].postID,
-                                "setIdeaID" to itemArray[tapPosition].ideaID.toString(),
-                                "setItemID" to itemArray[tapPosition].itemID.toString(),
                                 "setSubject" to itemArray[tapPosition].item,
                                 "setDetail" to itemArray[tapPosition].detail
                             )

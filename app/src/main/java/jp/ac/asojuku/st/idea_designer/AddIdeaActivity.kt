@@ -33,32 +33,39 @@ open class AddIdeaActivity : AppCompatActivity() {
         coroutine = Coroutine(bs, Handler(),Inner())
         coroutine.start()
 
+        var readFirst = true
+
         val database = FirebaseDatabase.getInstance()
         var ref = database.reference.child(bs.bsID).child("member")
-        ref.addListenerForSingleValueEvent(object :ValueEventListener{
+        ref.addValueEventListener(object :ValueEventListener{
             override fun onCancelled(p0: DatabaseError?) {}
             override fun onDataChange(p0: DataSnapshot?) {
-                bs.idea_list.clear()
-                var index = 0
                 p0!!.children.forEach {
-                    it.child("ideaList").children.forEach { ds ->
-                        Idea(
-                            bs,
-                            ds.child("subject").value.toString(),
-                            ds.child("detail").value.toString()
-                        ).apply{
-                            index = index
-                            postID = it.key
-                            ideaID = ds.key.toInt()
-                        }
-                        index ++
+                    if(it.child("isUpdated").value.toString() == "false"){
+                        return
                     }
                 }
-                for(i in bs.idea_list) {
-                    Log.d("test",i.idea + " : " + i.detail)
+                if(readFirst) {
+                    readFirst = false
+                    bs.idea_list.clear()
+                    var index = 0
+                    p0!!.children.forEach {
+                        it.child("ideaList").children.forEach { ds ->
+                            Idea(
+                                bs,
+                                ds.child("subject").value.toString(),
+                                ds.child("detail").value.toString()
+                            ).apply {
+                                index = index
+                                postID = it.key
+                                ideaID = ds.key.toInt()
+                            }
+                            index++
+                        }
+                    }
+                    print_idea(print_num)
+                    first_second = 0
                 }
-                print_idea(print_num)
-                first_second = 0
             }
         })
     }
@@ -146,14 +153,29 @@ open class AddIdeaActivity : AppCompatActivity() {
             bs.time_text = null
             val database = FirebaseDatabase.getInstance()
             var ref: DatabaseReference = database.reference.child(bs.bsID).child("member")
+            var i = 1
+            var j = 1
             for(idea in bs.idea_list){
                 for(item in idea.item_list) {
-                    val setData: Map<String, String> = mapOf(
-                        "subject" to item.item,
-                        "detail" to item.detail
+                    val post = FirebaseDatabase.getInstance().reference.child("${bs.bsID}/updateRequest").push()
+                    val setData:Map<String,String> = mapOf(
+                        "requestAction" to "add",
+                        "requestUserID" to bs.myMemberID,
+                        "changeMemberID" to idea.postID,
+                        "changeIdeaID" to idea.ideaID.toString(),
+                        "setSubject" to item.item,
+                        "setDetail" to item.detail
                     )
-                    ref.child("${idea.postID}/ideaList/${idea.ideaID}/itemList/${item.index}").setValue(setData)
+                    if(i==bs.idea_list.size && j==idea.item_list.size){
+                        post.setValue(setData) .addOnSuccessListener {
+                            ref.child("${bs.myMemberID}/isUpdated").setValue("true")
+                        }
+                    }
+                    else{post.setValue(setData)}
+
+                    j++
                 }
+                i++
             }
             startActivity<IdeaListActivity>("bs" to bs)
             coroutine.destroy()

@@ -152,7 +152,7 @@ class MakeActivity : AppCompatActivity() {
                                 ref.child("$availableID").setValue(setData)
 
                                 val post = ref.child("$availableID").child("member").push()
-                                post.setValue("")
+                                post.setValue(mapOf("isUpdated" to "false"))
                                 val postID = post.key
                                 make_button_finish.setOnClickListener {
                                     ref.child("$availableID/isHiring").setValue("false")
